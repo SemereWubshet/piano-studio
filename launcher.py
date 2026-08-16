@@ -76,7 +76,10 @@ os.chdir(os.path.dirname(os.path.abspath(__file__)))
 if not os.path.exists('scores'):
     os.makedirs('scores')
 
-httpd = socketserver.TCPServer(("", PORT), PianoHandler)
+class ReusableServer(socketserver.TCPServer):
+    allow_reuse_address = True
+
+httpd = ReusableServer(("", PORT), PianoHandler)
 monitor = threading.Thread(target=monitor_heartbeat, args=(httpd,))
 monitor.daemon = True
 monitor.start()
@@ -87,4 +90,10 @@ try:
 except webbrowser.Error:
     webbrowser.open(f"http://localhost:{PORT}")
 
-httpd.serve_forever()
+# Keep the server running, but watch for Ctrl+C
+try:
+    httpd.serve_forever()
+except KeyboardInterrupt:
+    print("\n🛑 Ctrl+C detected! Killing ghosts and closing the piano...")
+    httpd.server_close()  # This forces the port to be freed instantly!
+    print("Goodbye!")
