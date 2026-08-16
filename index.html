@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Piano Repertoire Studio</title>
+    
+    <script src="https://cdn.jsdelivr.net/npm/abcjs@6.2.2/dist/abcjs-basic-min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/abcjs@6.2.2/abcjs-audio.css">
+    
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="app-container">
+        
+        <aside id="sidebar">
+            <div class="sidebar-header">
+                <h2>🎹 Repertoire</h2>
+            </div>
+            <div class="sidebar-section">
+                <span>SCORE FILES</span>
+            </div>
+            <ul id="file-list" class="file-list">
+                <li class="placeholder">Loading scores...</li>
+            </ul>
+        </aside>
+
+        <main id="main-stage">
+            
+            <header id="top-bar">
+                <h1 id="active-score-title">Select a Score File</h1>
+                <div id="tune-tabs" class="tune-tabs">
+                    </div>
+            </header>
+
+            <section id="audio-bar">
+                <div id="midi-audio-controls">
+                    <span class="placeholder-text">Audio controls will appear here...</span>
+                </div>
+                <div class="view-controls">
+                    <button id="btn-zoom-out" class="btn" title="Zoom Out">-</button>
+                    <button id="btn-zoom-in" class="btn" title="Zoom In">+</button>
+                    <button id="btn-toggle-editor" class="btn">Toggle Editor</button>
+                </div>
+            </section>
+
+            <div id="workspace-body">
+                
+                <div id="sheet-wrapper">
+                    <div id="paper"></div> 
+                </div>
+
+                <div id="editor-drawer" class="editor-drawer hidden">
+                    <div class="drawer-header">
+                        <span>ABC Code Editor</span>
+                        <button id="btn-save" class="btn btn-primary">Save Changes</button>
+                    </div>
+                    <textarea id="abc-source" spellcheck="false" placeholder="Raw ABC code will load here..."></textarea>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

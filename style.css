@@ -1,0 +1,65 @@
+/* --- Variables & Reset --- */
+:root {
+    --bg-app: #f8fafc;
+    --bg-sidebar: #f1f5f9;
+    --bg-card: #ffffff;
+    --border: #e2e8f0;
+    --text-main: #0f172a;
+    --text-muted: #64748b;
+    --accent: #2563eb;
+    --accent-light: #dbeafe;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: system-ui, sans-serif; background: var(--bg-app); color: var(--text-main); height: 100vh; overflow: hidden; }
+
+/* --- Layout --- */
+#app-container { display: flex; height: 100vh; width: 100vw; }
+
+/* --- Sidebar --- */
+#sidebar { width: 260px; background: var(--bg-sidebar); border-right: 1px solid var(--border); display: flex; flex-direction: column; }
+.sidebar-header { padding: 20px; border-bottom: 1px solid var(--border); color: var(--accent); }
+.sidebar-section { padding: 15px 20px 5px; font-size: 0.75rem; font-weight: 700; color: var(--text-muted); }
+.file-list { list-style: none; padding: 10px; overflow-y: auto; }
+.file-list li { padding: 10px; border-radius: 6px; cursor: pointer; font-size: 0.9rem; font-weight: 500; color: var(--text-muted); transition: 0.2s; }
+.file-list li:hover { background: #e2e8f0; color: var(--text-main); }
+.file-list li.active { background: var(--bg-card); color: var(--accent); box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+
+/* --- Main Workspace --- */
+#main-stage { flex: 1; display: flex; flex-direction: column; background: var(--bg-card); min-width: 0; }
+
+/* --- Top Bar & Tunes --- */
+#top-bar { padding: 20px; border-bottom: 1px solid var(--border); }
+#active-score-title { font-size: 1.25rem; margin-bottom: 15px; }
+.tune-tabs { display: flex; gap: 8px; flex-wrap: wrap; }
+.tune-btn { padding: 6px 12px; border: 1px solid transparent; background: var(--bg-app); border-radius: 20px; font-size: 0.85rem; cursor: pointer; color: var(--text-muted); transition: 0.2s; }
+.tune-btn:hover { background: #e2e8f0; }
+.tune-btn.active { background: var(--accent-light); color: var(--accent); font-weight: 600; }
+
+/* --- Audio Bar --- */
+#audio-bar { padding: 10px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; background: var(--bg-app); min-height: 60px; }
+.view-controls { display: flex; gap: 10px; }
+.btn { padding: 6px 12px; border: 1px solid var(--border); background: var(--bg-card); border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 0.85rem; }
+.btn:hover { background: var(--bg-sidebar); }
+.btn-primary { background: var(--accent); color: white; border-color: var(--accent); }
+.btn-primary:hover { background: #1d4ed8; }
+
+/* --- The Stage (Sheet Music) --- */
+#workspace-body { flex: 1; display: flex; overflow: hidden; position: relative; }
+#sheet-wrapper { flex: 1; overflow: auto; padding: 40px; }
+#paper { display: inline-block; transform-origin: top left; transition: transform 0.2s ease; }
+
+/* Ensure ABCJS SVG fills but doesn't break out */
+#paper svg { max-width: none; } 
+
+/* --- ABCJS Custom Cursor Override (The Blue Note Highlight) --- */
+.abcjs-note_selected { fill: #0ea5e9 !important; }
+
+/* --- Collapsible Editor --- */
+.editor-drawer { width: 350px; background: #fafafa; border-left: 1px solid var(--border); display: flex; flex-direction: column; transition: margin-right 0.3s ease; }
+.editor-drawer.hidden { margin-right: -350px; }
+.drawer-header { padding: 15px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; font-weight: 600; }
+#abc-source { flex: 1; padding: 15px; border: none; outline: none; resize: none; font-family: monospace; font-size: 0.9rem; background: transparent; }
+
+/* --- Placeholders --- */
+.placeholder, .placeholder-text { color: var(--text-muted); font-style: italic; }
