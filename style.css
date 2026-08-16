@@ -112,3 +112,23 @@ body { font-family: system-ui, sans-serif; background: var(--bg-app); color: var
 .abcjs-btn.abcjs-pushed svg {
     fill: #ffffff !important; /* Turns the repeat icon white so it pops */
 }
+
+/* --- Collapsible Tree Sidebar Styles --- */
+.file-list { list-style: none; padding: 10px; overflow-y: auto; flex: 1; }
+.score-item { margin-bottom: 5px; }
+
+/* The Folder Header */
+.score-header { display: flex; align-items: center; cursor: pointer; padding: 8px 10px; border-radius: 6px; color: var(--text-muted); font-weight: 600; transition: 0.2s; font-size: 0.9rem; }
+.score-header:hover { background: #e2e8f0; color: var(--text-main); }
+.score-header.active { background: var(--bg-card); color: var(--accent); box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+
+/* The Rotating Arrow */
+.toggle-icon { width: 16px; height: 16px; margin-right: 8px; transition: transform 0.2s ease; fill: currentColor; }
+.toggle-icon.open { transform: rotate(90deg); } /* Points down when open */
+
+/* The Indented Tunes */
+.tune-list { list-style: none; margin: 4px 0 8px 24px; padding-left: 12px; border-left: 1px solid var(--border); display: none; flex-direction: column; gap: 2px; }
+.tune-list.open { display: flex; }
+.tune-list li { font-size: 0.85rem; padding: 6px 10px; border-radius: 4px; cursor: pointer; color: var(--text-muted); transition: 0.15s; }
+.tune-list li:hover { background: #e2e8f0; color: var(--text-main); }
+.tune-list li.active-tune { background: var(--accent-light); color: var(--accent); font-weight: 600; }
