@@ -1,22 +1,21 @@
 class PianoStudio {
     constructor() {
-        // App State
         this.scoreFiles = [];
         this.activeFileName = null;
-        this.tunes = []; // Holds the individual songs in a file
+        this.tunes = [];
         this.activeTuneIndex = 0;
         this.zoomLevel = 1.0;
         this.synthControl = null;
+        this.lastFolderSyncTime = "0"; // Tracks external file changes
 
-        // DOM Elements
         this.els = {
             fileList: document.getElementById('file-list'),
             title: document.getElementById('active-score-title'),
-            tabs: document.getElementById('tune-tabs'),
             paper: document.getElementById('paper'),
             audioControls: document.getElementById('midi-audio-controls'),
             editorDrawer: document.getElementById('editor-drawer'),
-            abcSource: document.getElementById('abc-source')
+            abcSource: document.getElementById('abc-source'),
+            btnSave: document.getElementById('btn-save')
         };
 
         this.init();
@@ -25,116 +24,180 @@ class PianoStudio {
     async init() {
         this.setupEventListeners();
         await this.fetchLocalScores();
+        this.startHeartbeatMonitor();
     }
 
-    // --- 1. FILE NAVIGATION ---
+    // --- 1. FILE NAVIGATION & ACCORDION SIDEBAR ---
 
     async fetchLocalScores() {
         try {
-            // We fetch the /scores/ directory. The Python server returns an HTML list of files!
             const response = await fetch('/scores/');
             const html = await response.text();
             
-            // A clever little regex to extract all .abc file names from the HTML
             const matches = [...html.matchAll(/href="([^"]+\.abc)"/g)];
             this.scoreFiles = matches.map(m => decodeURIComponent(m[1]));
 
             this.renderSidebar();
 
-            // Auto-load the first file if we have one
-            if (this.scoreFiles.length > 0) {
-                this.loadScoreFile(this.scoreFiles[0]);
-            } else {
-                this.els.fileList.innerHTML = '<li class="placeholder">No .abc files found in /scores/</li>';
+            if (this.scoreFiles.length > 0 && !this.activeFileName) {
+                await this.loadScoreFile(this.scoreFiles[0]);
             }
         } catch (error) {
             console.error("Could not load scores folder.", error);
-            this.els.fileList.innerHTML = '<li class="placeholder" style="color:red;">Error connecting to /scores/</li>';
         }
     }
 
     renderSidebar() {
         this.els.fileList.innerHTML = '';
         this.scoreFiles.forEach(fileName => {
-            const li = document.createElement('li');
-            li.textContent = fileName.replace('.abc', '');
-            if (fileName === this.activeFileName) li.classList.add('active');
+            // Create the main Score File button
+            const fileItem = document.createElement('li');
+            fileItem.textContent = fileName.replace('.abc', '');
             
-            li.onclick = () => this.loadScoreFile(fileName);
-            this.els.fileList.appendChild(li);
+            if (fileName === this.activeFileName) {
+                fileItem.classList.add('active');
+                
+                // If active, create the Accordion List of tunes directly underneath!
+                const tuneList = document.createElement('ul');
+                tuneList.className = 'tune-list';
+                
+                this.tunes.forEach((tuneAbc, index) => {
+                    const titleMatch = tuneAbc.match(/^T:\s*(.+)$/m);
+                    const tuneTitle = titleMatch ? titleMatch[1].trim() : `Song ${index + 1}`;
+                    
+                    const tuneItem = document.createElement('li');
+                    tuneItem.textContent = `${index + 1}. ${tuneTitle}`;
+                    if (index === this.activeTuneIndex) tuneItem.classList.add('active-tune');
+                    
+                    tuneItem.onclick = (e) => {
+                        e.stopPropagation(); // Stop the file click from triggering
+                        this.activeTuneIndex = index;
+                        this.renderSidebar();
+                        this.drawSheetMusic();
+                    };
+                    tuneList.appendChild(tuneItem);
+                });
+                
+                fileItem.appendChild(tuneList);
+            }
+            
+            // Clicking the file name loads it and opens the accordion
+            fileItem.onclick = () => {
+                if (this.activeFileName !== fileName) {
+                    this.loadScoreFile(fileName);
+                }
+            };
+            this.els.fileList.appendChild(fileItem);
         });
     }
 
     async loadScoreFile(fileName) {
         this.activeFileName = fileName;
-        this.renderSidebar(); // Update active highlight
-
-        // Fetch the raw text of the .abc file
+        
         const res = await fetch(`/scores/${fileName}`);
         const abcText = await res.text();
 
-        // Split the file into separate songs (ABC format uses "X:" to start a new song)
         this.tunes = abcText.split(/(?=^X:\s*\d+)/m).filter(t => t.trim().length > 0);
         this.activeTuneIndex = 0;
 
         this.els.title.textContent = fileName.replace('.abc', '').replace(/[-_]/g, ' ');
-        this.renderTuneTabs();
+        this.renderSidebar();
         this.drawSheetMusic();
     }
 
-    renderTuneTabs() {
-        this.els.tabs.innerHTML = '';
-        this.tunes.forEach((tuneAbc, index) => {
-            // Try to extract the title (T:) for the button
-            const titleMatch = tuneAbc.match(/^T:\s*(.+)$/m);
-            const tuneTitle = titleMatch ? titleMatch[1].trim() : `Song ${index + 1}`;
+    // --- 2. SAVING & MONITORING ---
 
-            const btn = document.createElement('button');
-            btn.className = `tune-btn ${index === this.activeTuneIndex ? 'active' : ''}`;
-            btn.textContent = tuneTitle;
-            btn.onclick = () => {
-                this.activeTuneIndex = index;
-                this.renderTuneTabs();
-                this.drawSheetMusic();
-            };
-            this.els.tabs.appendChild(btn);
-        });
+    async saveChanges() {
+        if (!this.activeFileName) return;
+        
+        const newCode = this.els.abcSource.value;
+        this.els.btnSave.textContent = "Saving...";
+        
+        try {
+            // 1. Send POST request to Python to write the file
+            await fetch(`/save/${this.activeFileName}`, {
+                method: 'POST',
+                body: newCode
+            });
+            
+            // --- THE FIX ---
+            // 2. Immediately fetch the new heartbeat time so we don't trigger a fake "external update" reload!
+            const res = await fetch('/heartbeat');
+            this.lastFolderSyncTime = await res.text();
+            // ---------------
+            
+            this.els.btnSave.textContent = "Saved!";
+            setTimeout(() => this.els.btnSave.textContent = "Save Changes", 2000);
+            
+            // 3. Reload the view with the new code
+            this.tunes = newCode.split(/(?=^X:\s*\d+)/m).filter(t => t.trim().length > 0);
+            this.renderSidebar();
+            this.drawSheetMusic();
+
+        } catch (error) {
+            console.error(error);
+            alert("Failed to save file.");
+            this.els.btnSave.textContent = "Save Changes";
+        }
     }
 
-    // --- 2. THE MUSIC ENGINE ---
+    startHeartbeatMonitor() {
+        setInterval(async () => {
+            try {
+                // Ping Python. Python returns the timestamp of the latest file edit
+                const res = await fetch('/heartbeat');
+                const serverTime = await res.text();
+                
+                if (this.lastFolderSyncTime === "0") {
+                    this.lastFolderSyncTime = serverTime; // Initial load
+                } else if (serverTime !== this.lastFolderSyncTime) {
+                    // Something changed in the folder externally! 
+                    console.log("External changes detected. Refreshing app...");
+                    this.lastFolderSyncTime = serverTime;
+                    
+                    // Re-fetch everything seamlessly without a page reload
+                    await this.fetchLocalScores();
+                    if (this.activeFileName) {
+                        await this.loadScoreFile(this.activeFileName);
+                    }
+                }
+            } catch (e) {
+                // Ignore failed heartbeats (happens during shutdown)
+            }
+        }, 2000);
+    }
+
+    // --- 3. THE MUSIC ENGINE ---
 
     drawSheetMusic() {
+        if (this.synthControl) {
+            this.synthControl.pause();
+        }
+
         const currentTuneAbc = this.tunes[this.activeTuneIndex] || "";
-        
-        // Update Editor
         this.els.abcSource.value = currentTuneAbc;
 
-        // Draw the visual sheet music
         const visualObjs = ABCJS.renderAbc("paper", currentTuneAbc, {
             responsive: "resize",
-            add_classes: true, // Required for our blue highlighting!
+            add_classes: true, 
             staffwidth: 760,
             wrap: { minSpacing: 1.8, maxSpacing: 2.8 }
         });
 
-        // Initialize Audio and the Blue Tracker Cursor
         if (ABCJS.synth.supportsAudio() && visualObjs.length > 0) {
             this.setupAudioAndCursor(visualObjs[0]);
         }
     }
 
     setupAudioAndCursor(visualObj) {
-        this.els.audioControls.innerHTML = ''; // Clear old controls
+        this.els.audioControls.innerHTML = ''; 
 
         this.synthControl = new ABCJS.synth.SynthController();
         
-        // This is the magic that highlights the notes in blue!
         const cursorControl = {
             onStart: () => {},
             onEvent: (ev) => {
-                // Clear old highlights
                 document.querySelectorAll('.abcjs-note_selected').forEach(el => el.classList.remove('abcjs-note_selected'));
-                // Add highlight to current note
                 if (ev && ev.elements) {
                     ev.elements.forEach(noteArray => {
                         noteArray.forEach(svgNode => svgNode.classList.add('abcjs-note_selected'));
@@ -146,26 +209,23 @@ class PianoStudio {
             }
         };
 
-        // Load the UI widget
         this.synthControl.load("#midi-audio-controls", cursorControl, {
             displayLoop: true,
             displayRestart: true,
             displayPlay: true,
             displayProgress: true,
-            displayWarp: true // Tempo control
+            displayWarp: true 
         });
 
-        // Load the audio data
         const createSynth = new ABCJS.synth.CreateSynth();
         createSynth.init({ visualObj: visualObj }).then(() => {
             this.synthControl.setTune(visualObj, true, { program: 0 });
         });
     }
 
-    // --- 3. UI CONTROLS ---
+    // --- 4. UI CONTROLS ---
 
     setupEventListeners() {
-        // Zooming Controls
         document.getElementById('btn-zoom-in').addEventListener('click', () => {
             this.zoomLevel = Math.min(2.5, this.zoomLevel + 0.15);
             this.els.paper.style.transform = `scale(${this.zoomLevel})`;
@@ -176,12 +236,13 @@ class PianoStudio {
             this.els.paper.style.transform = `scale(${this.zoomLevel})`;
         });
 
-        // Toggle Editor Drawer
         document.getElementById('btn-toggle-editor').addEventListener('click', () => {
             this.els.editorDrawer.classList.toggle('hidden');
         });
 
-        // First click anywhere unlocks browser audio (standard browser security feature)
+        // The Save Button!
+        this.els.btnSave.addEventListener('click', () => this.saveChanges());
+
         const unlockAudio = () => {
             if (window.AudioContext || window.webkitAudioContext) {
                 const ctx = new (window.AudioContext || window.webkitAudioContext)();
@@ -193,7 +254,6 @@ class PianoStudio {
     }
 }
 
-// Start the engine when the page loads
 window.addEventListener("DOMContentLoaded", () => {
     new PianoStudio();
 });

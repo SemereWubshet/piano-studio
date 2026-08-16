@@ -63,3 +63,52 @@ body { font-family: system-ui, sans-serif; background: var(--bg-app); color: var
 
 /* --- Placeholders --- */
 .placeholder, .placeholder-text { color: var(--text-muted); font-style: italic; }
+
+/* --- Accordion Sidebar Styles --- */
+.tune-list { list-style: none; margin-top: 8px; margin-left: 10px; border-left: 2px solid var(--border); padding-left: 10px; display: flex; flex-direction: column; gap: 4px; }
+.tune-list li { font-size: 0.85rem; padding: 6px 10px; color: var(--text-muted); background: transparent !important; box-shadow: none !important; }
+.tune-list li:hover { background: #e2e8f0 !important; color: var(--text-main); }
+.tune-list li.active-tune { background: var(--accent-light) !important; color: var(--accent); font-weight: 600; }
+
+/* --- Audio Bar Container --- */
+#midi-audio-controls {
+    flex: 1;          /* Tell the container to fill all empty space */
+    width: 100%;
+}
+
+/* --- Modern, Long Playbar --- */
+.abcjs-inline-audio { 
+    display: flex !important; 
+    align-items: center; 
+    gap: 15px; 
+    width: 95% !important; /* Large width */
+    padding: 0 !important;
+}
+
+.abcjs-midi-progress-background {
+    background-color: #e2e8f0 !important;
+    border-radius: 10px !important;
+    height: 8px !important;
+    border: none !important;
+    flex: 1 !important;      /* Stretch the actual slider line! */
+    min-width: 0 !important; 
+    cursor: pointer;
+}
+
+.abcjs-midi-progress-indicator {
+    background-color: var(--accent) !important; /* The blue fill color */
+    border-radius: 10px !important;
+    height: 8px !important;
+    margin-top: 0 !important;
+    transition: width 0.1s linear; 
+}
+
+/* --- Active Toggle Buttons (Repeat) --- */
+.abcjs-btn.abcjs-pushed {
+    background-color: var(--accent) !important;
+    border-radius: 6px !important;
+}
+
+.abcjs-btn.abcjs-pushed svg {
+    fill: #ffffff !important; /* Turns the repeat icon white so it pops */
+}
