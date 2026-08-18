@@ -134,24 +134,36 @@ class PianoStudio {
     async saveChanges() {
         if (!this.activeFileName) return;
         
-        const newCode = this.els.abcSource.value;
+        const editedTuneCode = this.els.abcSource.value;
         this.els.btnSave.textContent = "Saving...";
+
+        // 1. Grab all tunes, and trim any messy trailing/leading whitespace from each one
+        let allTunes = this.fileContents[this.activeFileName]
+                        .split(/(?=^X:\s*\d+)/m)
+                        .map(t => t.trim()) // <-- THIS IS THE MAGIC FIX
+                        .filter(t => t.length > 0);
+
+        // 2. Replace the active tune with your edits
+        allTunes[this.activeTuneIndex] = editedTuneCode.trim();
+
+        // 3. Join them cleanly with a single newline
+        const fullFileCode = allTunes.join("\n\n");
         
         try {
             await fetch(`/save/${this.activeFileName}`, {
                 method: 'POST',
-                body: newCode
+                body: fullFileCode
             });
             
-            // Fix the echo: update heartbeat clock immediately
-            const res = await fetch('/heartbeat');
-            this.lastFolderSyncTime = await res.text();
+            setTimeout(async () => {
+                const res = await fetch('/heartbeat');
+                this.lastFolderSyncTime = await res.text();
+            }, 500);
             
             this.els.btnSave.textContent = "Saved!";
             setTimeout(() => this.els.btnSave.textContent = "Save Changes", 2000);
             
-            // Update the cache and redraw!
-            this.fileContents[this.activeFileName] = newCode;
+            this.fileContents[this.activeFileName] = fullFileCode;
             this.renderSidebar();
             this.drawSheetMusic();
 
