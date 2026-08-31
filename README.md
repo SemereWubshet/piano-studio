@@ -1,9 +1,8 @@
 # Piano Studio
 
-A lightweight, local piano practice studio that syncs directly with local `.abc` files. It provides a seamless, native-desktop experience inside a web browser.
+A lightweight, local piano practice studio that syncs directly with local files to provide a seamless, native-desktop experience inside a web browser. Since it uses human readable ABC notation (`.abc` files), it allows musicians to manage, edit, and practice an entire multi-song repertoire using simple plain-text files. This makes transcribing, version-controlling, and learning new piano pieces as fast and lightweight.
 
 **The Frontend:** Modern light mode and a clean dashboard layout. It uses vanilla `abcjs` via CDN for reliable SVG sheet music generation and piano Web Audio synthesis.
-
 
 **The Backend:** A tiny Python server (`launcher.py`) handles local file I/O operations and port binding. It utilizes a background watchdog that shuts down and frees the port when  the browser tab is closed.
 
@@ -25,7 +24,6 @@ The fastest way to test the application is to run the Python backend manually.
 python launcher.py
 
 ```
-
 
 3. Open a browser and navigate to `http://localhost:8000`.
 
@@ -53,7 +51,6 @@ MimeType=x-scheme-handler/piano;
 ```
 update-desktop-database ~/.local/share/applications/
 xdg-mime default piano-studio.desktop x-scheme-handler/piano
-
 ```
 
 **2. Whitelist the Protocol in Chromium/Brave**<br>
@@ -73,7 +70,7 @@ To prevent the browser from showing a security warning every time you launch the
 ```
 * Explicitly whitelist the `piano` protocol using the `AutoLaunchProtocolsFromOrigins` policy so the browser automatically trusts the local request.
 
-**3. Clear the cache<br>
+**3. Clear the cache**<br>
 Browsers cache registered protocol handlers and policies at startup. Type `brave://restart` (or `chrome://restart`) in your URL bar and press Enter to apply the changes.
 
 **4. Launch via `launcher.html`**<br>
@@ -89,7 +86,7 @@ Because modern browsers strip origin contexts from bookmarks and New Tab pages, 
 
 This application is designed to act as a local dashboard for your plain-text sheet music. It reads from the `scores/` directory in the root folder.
 
-1. Navigate to the `scores/` folder in the project directory.
+1. Navigate to the `scores/` folder in the project directory (pre-loaded with `sample.abc` to help you get started).
 2. Create or drop your `.abc` files directly into this folder.
 3. The dashboard will automatically read them and populate your sidebar.
 
