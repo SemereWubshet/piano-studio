@@ -284,23 +284,23 @@ setupEventListeners() {
         //     });
         // }
 
+        // Setup state to prevent duplicate shutdown signals
+        let isShuttingDown = false;
+
+        // 1. Handle explicit clicks on the "Quit Studio" button
         const quitBtn = document.getElementById("btn-quit");
         if (quitBtn) {
             quitBtn.addEventListener("click", () => {
-                // Instantly change button text to show it registered the click
-                quitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> <span>Shutting down...</span>';
+                if (isShuttingDown) return;
+                isShuttingDown = true;
                 
-                // 1. Brute-force kill ALL background loops
-                for (let i = 1; i < 99999; i++) window.clearInterval(i);
+                // Fire the instant background shutdown signal
+                navigator.sendBeacon("/shutdown");
                 
-                // 2. Fire the shutdown signal in the background
-                fetch("/shutdown", { method: "POST", keepalive: true }).catch(() => {});
-                
-                // 3. Attempt to close the tab IMMEDIATELY
-                window.open('', '_self', '');
+                // Instantly command the tab to close itself
                 window.close();
                 
-                // 4. Fallback: Wipe the screen clean if the browser blocks the close
+                // Fallback: If Brave still blocks the close, wipe the screen
                 setTimeout(() => {
                     document.body.innerHTML = `
                         <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100vh; background:#f8fafc; font-family:sans-serif;">
@@ -312,6 +312,14 @@ setupEventListeners() {
                 }, 150);
             });
         }
+
+        // 2. Handle implicit tab closures (clicking the browser 'X')
+        window.addEventListener("pagehide", () => {
+            if (!isShuttingDown) {
+                isShuttingDown = true;
+                navigator.sendBeacon("/shutdown");
+            }
+        });
 
         this.els.btnSave?.addEventListener('click', () => this.saveChanges());
 
