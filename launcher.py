@@ -1,14 +1,17 @@
 import http.server
 import socketserver
+import socket
 import webbrowser
 import threading
 import time
 import os
+import subprocess
 import urllib.parse
+
 
 PORT = 8000
 LAST_HEARTBEAT = time.time()
-TIMEOUT = 5.0 # Seconds before auto-closing
+TIMEOUT = 600 # Seconds before notifying the user that the tab is inactive
 
 def get_latest_mtime():
     """Checks the 'scores' folder to see if any file was recently modified."""
@@ -38,6 +41,23 @@ class PianoHandler(http.server.SimpleHTTPRequestHandler):
             super().do_GET()
 
     def do_POST(self):
+
+        # Handle shutdown request from the web UI
+        if self.path == "/shutdown":
+            self.send_response(200)
+            self.end_headers()
+            print("\nShutdown requested from browser UI. Closing server...")
+            
+            # Use self.server instead of httpd
+            threading.Thread(target=self.server.shutdown).start()
+            self.server.server_close()
+
+            try:
+                httpd.server_close()
+            except Exception:
+                pass
+            return
+
         # Handle saving edits from the web UI!
         if self.path.startswith('/save/'):
             filename = urllib.parse.unquote(self.path[6:])
@@ -62,14 +82,35 @@ class PianoHandler(http.server.SimpleHTTPRequestHandler):
         if '/heartbeat' not in format % args:
             super().log_message(format, *args)
 
+def send_linux_notification(title, message):
+    try:
+        # Standard freedesktop notification on GNOME, KDE, XFCE, etc.
+        subprocess.run(["notify-send", title, message], check=False)
+    except Exception:
+        # Fallback if notify-send is unavailable
+        print(f"[{title}] {message}")
+
 def monitor_heartbeat(server):
     global LAST_HEARTBEAT
+    notified = False
+
     while True:
-        time.sleep(2)
-        if time.time() - LAST_HEARTBEAT > TIMEOUT:
-            print("\nTab closed. Shutting down Piano Studio...")
-            server.shutdown()
-            break
+        time.sleep(5)
+        elapsed = time.time() - LAST_HEARTBEAT
+
+        if elapsed > TIMEOUT and not notified:
+            notification_msg = "Piano Studio tab inactive/closed. Server is still running on port 8000."
+            print(f"\n[ALERT] {notification_msg}")
+
+            # Send desktop notification
+            send_linux_notification("Piano Studio", notification_msg)
+
+            # Mark notified so it doesn't spam every 5 seconds
+            # notified = True
+
+        elif elapsed <= TIMEOUT:
+            # Reset flag once the browser reconnects and sends a fresh heartbeat
+            notified = False
 
 # Ensure we are running in the correct folder
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
@@ -85,10 +126,10 @@ monitor.daemon = True
 monitor.start()
 
 print(f"🎹 Piano Studio is live at http://localhost:{PORT}")
-try:
-    webbrowser.get("brave-browser %s").open(f"http://localhost:{PORT}")
-except webbrowser.Error:
-    webbrowser.open(f"http://localhost:{PORT}")
+# try:
+#     webbrowser.get("brave-browser %s").open(f"http://localhost:{PORT}")
+# except webbrowser.Error:
+#     webbrowser.open(f"http://localhost:{PORT}", new=0)
 
 # Keep the server running, but watch for Ctrl+C
 try:

@@ -1,3 +1,5 @@
+console.log("FLAG 1: app.js is officially loading.");
+
 class PianoStudio {
     constructor() {
         this.scoreFiles = [];
@@ -206,8 +208,7 @@ class PianoStudio {
         const visualObjs = ABCJS.renderAbc("paper", currentTuneAbc, {
             responsive: "resize",
             add_classes: true, 
-            staffwidth: 760,
-            wrap: { minSpacing: 1.8, maxSpacing: 2.8 }
+            staffwidth: 760
         });
 
         if (ABCJS.synth.supportsAudio() && visualObjs.length > 0) {
@@ -251,22 +252,68 @@ class PianoStudio {
 
     // --- 4. UI CONTROLS ---
 
-    setupEventListeners() {
-        document.getElementById('btn-zoom-in').addEventListener('click', () => {
+setupEventListeners() {
+        // The ?. prevents crashes if a button is missing from the HTML
+        document.getElementById('btn-zoom-in')?.addEventListener('click', () => {
             this.zoomLevel = Math.min(2.5, this.zoomLevel + 0.15);
             this.els.paper.style.transform = `scale(${this.zoomLevel})`;
         });
 
-        document.getElementById('btn-zoom-out').addEventListener('click', () => {
+        document.getElementById('btn-zoom-out')?.addEventListener('click', () => {
             this.zoomLevel = Math.max(0.5, this.zoomLevel - 0.15);
             this.els.paper.style.transform = `scale(${this.zoomLevel})`;
         });
 
-        document.getElementById('btn-toggle-editor').addEventListener('click', () => {
+        document.getElementById('btn-toggle-editor')?.addEventListener('click', () => {
             this.els.editorDrawer.classList.toggle('hidden');
         });
 
-        this.els.btnSave.addEventListener('click', () => this.saveChanges());
+        // The Quit Button logic that works
+        // const quitBtn = document.getElementById("btn-quit");
+        // if (quitBtn) {
+        //     quitBtn.addEventListener("click", () => {
+        //         console.log("FLAG 4: Button clicked. Bypassing pop-up and sending signal to Python...");
+                
+        //         fetch("/shutdown", { method: "POST" })
+        //             .then(response => {
+        //                 console.log("FLAG 5 SUCCESS: Python replied with status:", response.status);
+        //             })
+        //             .catch(error => {
+        //                 console.error("FLAG 5 ERROR: The signal never reached Python:", error);
+        //             });
+        //     });
+        // }
+
+        const quitBtn = document.getElementById("btn-quit");
+        if (quitBtn) {
+            quitBtn.addEventListener("click", () => {
+                // Instantly change button text to show it registered the click
+                quitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> <span>Shutting down...</span>';
+                
+                // 1. Brute-force kill ALL background loops
+                for (let i = 1; i < 99999; i++) window.clearInterval(i);
+                
+                // 2. Fire the shutdown signal in the background
+                fetch("/shutdown", { method: "POST", keepalive: true }).catch(() => {});
+                
+                // 3. Attempt to close the tab IMMEDIATELY
+                window.open('', '_self', '');
+                window.close();
+                
+                // 4. Fallback: Wipe the screen clean if the browser blocks the close
+                setTimeout(() => {
+                    document.body.innerHTML = `
+                        <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100vh; background:#f8fafc; font-family:sans-serif;">
+                            <h1 style="color:#0f172a; margin-bottom: 8px;">🎹 Studio Offline</h1>
+                            <p style="color:#64748b;">The local server has been cleanly shut down.</p>
+                            <p style="color:#64748b;">You can safely close this tab.</p>
+                        </div>
+                    `;
+                }, 150);
+            });
+        }
+
+        this.els.btnSave?.addEventListener('click', () => this.saveChanges());
 
         const unlockAudio = () => {
             if (window.AudioContext || window.webkitAudioContext) {

@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Loading Studio...</title>
+</head>
+<body style="background:#f8fafc;">
+  
+  <!-- 1. Silently trigger the OS protocol and wake up Python -->
+  <iframe src="piano://start" style="display:none;"></iframe>
+
+  <script>
+    // 2. Ping the server as fast as the browser can process frames (no timers)
+    function connect() {
+      fetch("http://localhost:8000", { mode: "no-cors" })
+        .then(() => {
+          // 3. The moment Python answers, overwrite the current tab's URL
+          window.location.replace("http://localhost:8000");
+        })
+        .catch(() => {
+          // If connection is refused (Python still booting), instantly try again
+          requestAnimationFrame(connect);
+        });
+    }
+    
+    connect();
+  </script>
+</body>
+</html>
