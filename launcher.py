@@ -1,3 +1,16 @@
+"""
+Piano Studio Backend Server
+
+Provides HTTP server and file management for Piano Studio web application.
+Serves static files (HTML, CSS, JS), handles file edits, and monitors score file changes.
+
+Usage:
+    python launcher.py
+
+Server runs on http://localhost:8000 by default.
+Edit PORT constant below to change the port.
+"""
+
 import http.server
 import socketserver
 import socket
@@ -126,6 +139,7 @@ monitor.daemon = True
 monitor.start()
 
 print(f"🎹 Piano Studio is live at http://localhost:{PORT}")
+# Uncomment the following 3 lines to automatically open the browser (requires Brave browser installed)
 # try:
 #     webbrowser.get("brave-browser %s").open(f"http://localhost:{PORT}")
 # except webbrowser.Error:

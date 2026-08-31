@@ -1,4 +1,15 @@
-console.log("FLAG 1: app.js is officially loading.");
+/**
+ * Piano Studio Frontend Application
+ * 
+ * Main client-side logic for the Piano Studio web application.
+ * Handles score file management, ABC rendering, MIDI playback, and editor functionality.
+ * 
+ * Dependencies:
+ * - ABCJS v6.2.2 (loaded from CDN)
+ * - FontAwesome icons (loaded from CDN)
+ */
+
+
 
 class PianoStudio {
     constructor() {
@@ -268,21 +279,6 @@ setupEventListeners() {
             this.els.editorDrawer.classList.toggle('hidden');
         });
 
-        // The Quit Button logic that works
-        // const quitBtn = document.getElementById("btn-quit");
-        // if (quitBtn) {
-        //     quitBtn.addEventListener("click", () => {
-        //         console.log("FLAG 4: Button clicked. Bypassing pop-up and sending signal to Python...");
-                
-        //         fetch("/shutdown", { method: "POST" })
-        //             .then(response => {
-        //                 console.log("FLAG 5 SUCCESS: Python replied with status:", response.status);
-        //             })
-        //             .catch(error => {
-        //                 console.error("FLAG 5 ERROR: The signal never reached Python:", error);
-        //             });
-        //     });
-        // }
 
         // Setup state to prevent duplicate shutdown signals
         let isShuttingDown = false;
