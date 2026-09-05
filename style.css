@@ -17,7 +17,28 @@ body { font-family: system-ui, sans-serif; background: var(--bg-app); color: var
 #app-container { display: flex; height: 100vh; width: 100vw; }
 
 /* --- Sidebar --- */
-#sidebar { width: 260px; background: var(--bg-sidebar); border-right: 1px solid var(--border); display: flex; flex-direction: column; }
+#sidebar {
+  --sidebar-w: 260px;
+  width: var(--sidebar-w);
+  min-width: 180px;
+  max-width: 500px;
+  background: var(--bg-sidebar);
+  border-right: 4px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  transition: margin-left 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  margin-left: 0;
+}
+
+#sidebar.collapsed {
+  margin-left: calc(-1 * var(--sidebar-w));
+}
+
+/* Make the right border feel like an active resize edge */
+#sidebar:hover {
+  border-right-color: var(--accent, #3b82f6);
+}
 .sidebar-header { padding: 20px; border-bottom: 1px solid var(--border); color: var(--accent); }
 .sidebar-section { padding: 15px 20px 5px; font-size: 0.75rem; font-weight: 700; color: var(--text-muted); }
 .file-list { list-style: none; padding: 10px; overflow-y: auto; }
@@ -56,8 +77,30 @@ body { font-family: system-ui, sans-serif; background: var(--bg-app); color: var
 .abcjs-note_selected { fill: #0ea5e9 !important; }
 
 /* --- Collapsible Editor --- */
-.editor-drawer { width: 350px; background: #fafafa; border-left: 1px solid var(--border); display: flex; flex-direction: column; transition: margin-right 0.3s ease; }
-.editor-drawer.hidden { margin-right: -350px; }
+.editor-drawer {
+  --drawer-w: 420px;
+  width: var(--drawer-w);
+  min-width: 280px;
+  max-width: 75vw;
+  overflow: auto;
+  position: relative;
+  direction: ltr; /* Normal left-to-right */
+  background: #fafafa;
+  border-left: 4px solid var(--border); /* Slightly thicker border for grabbing */
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  transition: margin-right 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  margin-right: 0;
+}
+
+.editor-drawer.hidden,
+.editor-drawer:not(.open) {
+  margin-right: calc(-1 * var(--drawer-w));
+}
+#editor-drawer:hover {
+  border-left-color: var(--accent, #3b82f6);
+}
 .drawer-header { padding: 15px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; font-weight: 600; }
 #abc-source { flex: 1; padding: 15px; border: none; outline: none; resize: none; font-family: monospace; font-size: 0.9rem; background: transparent; }
 
@@ -164,4 +207,30 @@ body { font-family: system-ui, sans-serif; background: var(--bg-app); color: var
 .abcjs-inline-audio button:hover {
   color: #f8fafc !important;
   transform: scale(1.1);
+}
+
+.btn-sidebar-toggle {
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text-muted);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  transition: all 0.15s ease;
+  flex-shrink: 0;
+}
+
+.btn-sidebar-toggle:hover {
+  background: var(--bg-sidebar);
+  color: var(--text-main);
+  border-color: var(--border-focus);
+}
+
+.btn-sidebar-toggle:active {
+  transform: scale(0.95);
 }

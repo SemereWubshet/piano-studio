@@ -264,7 +264,25 @@ class PianoStudio {
 
     // --- 4. UI CONTROLS ---
 
-setupEventListeners() {
+    toggleEditor(forceState) {
+        const drawer = this.els.editorDrawer || document.getElementById('editor-drawer');
+        if (!drawer) return;
+
+        // Sync whatever width you manually dragged it to before animating
+        if (drawer.offsetWidth > 0) {
+            drawer.style.setProperty('--drawer-w', `${drawer.offsetWidth}px`);
+        }
+
+        if (typeof forceState === "boolean") {
+            drawer.classList.toggle("open", forceState);
+            drawer.classList.toggle("hidden", !forceState);
+        } else {
+            drawer.classList.toggle("open");
+            drawer.classList.toggle("hidden");
+        }
+    }
+
+    setupEventListeners() {
         // The ?. prevents crashes if a button is missing from the HTML
         document.getElementById('btn-zoom-in')?.addEventListener('click', () => {
             this.zoomLevel = Math.min(2.5, this.zoomLevel + 0.15);
@@ -277,13 +295,86 @@ setupEventListeners() {
         });
 
         document.getElementById('btn-toggle-editor')?.addEventListener('click', () => {
-            this.els.editorDrawer.classList.toggle('hidden');
+            this.toggleEditor();
         });
 
         window.addEventListener('pagehide', () => {
         // Fires on Ctrl+R, F5, reload click, AND tab close
         navigator.sendBeacon('/shutdown');
         });
+
+        // --- SIDEBAR TOGGLE & RESIZE (Combined) ---
+        const sidebarEl = document.getElementById("sidebar");
+        const toggleSidebarBtn = document.getElementById("btn-toggle-sidebar");
+
+        if (sidebarEl) {
+            // 1. Toggle Collapse
+            if (toggleSidebarBtn) {
+                toggleSidebarBtn.addEventListener("click", () => {
+                    sidebarEl.style.setProperty('--sidebar-w', `${sidebarEl.offsetWidth}px`);
+                    sidebarEl.classList.toggle("collapsed");
+                });
+            }
+
+            // 2. Full-Height Border Drag
+            sidebarEl.addEventListener('mousedown', (e) => {
+                const rect = sidebarEl.getBoundingClientRect();
+                const distanceFromRightBorder = rect.right - e.clientX;
+
+                // Only activate if clicking within 8px of the right border
+                if (distanceFromRightBorder > 8 || distanceFromRightBorder < 0) return;
+
+                e.preventDefault();
+                document.body.style.cursor = 'col-resize';
+                document.body.style.userSelect = 'none';
+
+                const onMove = (moveEvt) => {
+                    const newWidth = moveEvt.clientX - rect.left;
+                    if (newWidth >= 180 && newWidth <= 500) {
+                        sidebarEl.style.width = `${newWidth}px`;
+                        sidebarEl.style.setProperty('--sidebar-w', `${newWidth}px`);
+                    }
+                };
+
+                const onUp = () => {
+                    document.body.style.cursor = '';
+                    document.body.style.userSelect = '';
+                    window.removeEventListener('mousemove', onMove);
+                    window.removeEventListener('mouseup', onUp);
+                };
+
+                window.addEventListener('mousemove', onMove);
+                window.addEventListener('mouseup', onUp);
+            });
+        }
+
+        const drawer = this.els.editorDrawer || document.getElementById('editor-drawer');
+        if (drawer) {
+        drawer.addEventListener('mousedown', (e) => {
+            // Only trigger if clicking near the left border (first 8px)
+            if (e.offsetX > 8) return;
+            e.preventDefault();
+            document.body.style.cursor = 'col-resize';
+            document.body.style.userSelect = 'none';
+
+            const onMove = (moveEvt) => {
+            const newWidth = window.innerWidth - moveEvt.clientX;
+            if (newWidth >= 280 && newWidth <= window.innerWidth * 0.75) {
+                drawer.style.setProperty('--drawer-w', `${newWidth}px`);
+            }
+            };
+
+            const onUp = () => {
+            document.body.style.cursor = '';
+            document.body.style.userSelect = '';
+            window.removeEventListener('mousemove', onMove);
+            window.removeEventListener('mouseup', onUp);
+            };
+
+            window.addEventListener('mousemove', onMove);
+            window.addEventListener('mouseup', onUp);
+        });
+        }
 
         // Setup state to prevent duplicate shutdown signals
         let isShuttingDown = false;

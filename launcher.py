@@ -22,7 +22,7 @@ import os
 import subprocess
 import urllib.parse
 
-
+SHUTDOWN_TIMER = None
 PORT = 8000
 LAST_HEARTBEAT = time.time()
 TIMEOUT = 600 # Seconds before notifying the user that the tab is inactive
