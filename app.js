@@ -40,13 +40,14 @@ class PianoStudio {
         this.setupEventListeners();
         await this.fetchLocalScores();
         this.startHeartbeatMonitor();
+        fetch('/heartbeat'); // Wakes Python and cancels the reload shutdown timer immediately
     }
 
     // --- 1. THE COLLAPSIBLE SIDEBAR ---
 
     async fetchLocalScores() {
         try {
-            const response = await fetch('/scores/');
+            const response = await fetch('/scores/', { cache: 'no-store' });
             const html = await response.text();
             
             const matches = [...html.matchAll(/href="([^"]+\.abc)"/g)];
@@ -54,7 +55,7 @@ class PianoStudio {
 
             // Fetch the contents of ALL files so we can list their tunes
             for (const file of this.scoreFiles) {
-                const res = await fetch(`/scores/${file}`);
+                const res = await fetch(`/scores/${file}`, { cache: 'no-store' });
                 this.fileContents[file] = await res.text();
             }
 
@@ -279,6 +280,10 @@ setupEventListeners() {
             this.els.editorDrawer.classList.toggle('hidden');
         });
 
+        window.addEventListener('pagehide', () => {
+        // Fires on Ctrl+R, F5, reload click, AND tab close
+        navigator.sendBeacon('/shutdown');
+        });
 
         // Setup state to prevent duplicate shutdown signals
         let isShuttingDown = false;

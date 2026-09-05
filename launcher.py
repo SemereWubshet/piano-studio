@@ -14,6 +14,7 @@ Edit PORT constant below to change the port.
 import http.server
 import socketserver
 import socket
+import sys
 import webbrowser
 import threading
 import time
@@ -39,16 +40,38 @@ def get_latest_mtime():
             latest = max(latest, os.path.getmtime(filepath))
     return latest
 
+def cancel_pending_shutdown():
+    global SHUTDOWN_TIMER
+    if SHUTDOWN_TIMER is not None:
+        SHUTDOWN_TIMER.cancel()
+        SHUTDOWN_TIMER = None
+
+def execute_shutdown(server):
+    print("\n🛑 Tab closed and grace period expired. Server shutting down.")
+    threading.Thread(target=server.shutdown).start()
+    server.server_close()
+    try:
+        httpd.server_close()
+    except Exception:
+        pass
+    return
+
 class PianoHandler(http.server.SimpleHTTPRequestHandler):
+    def end_headers(self):
+        self.send_header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0')
+        self.send_header('Pragma', 'no-cache')
+        self.send_header('Expires', '0')
+        super().end_headers()
+
     def do_GET(self):
         global LAST_HEARTBEAT
         if self.path == '/heartbeat':
-            # 1. Update the tab-closing timer
-            LAST_HEARTBEAT = time.time()
+            cancel_pending_shutdown() # Cancel shutdown if tab is still active
+            LAST_HEARTBEAT = time.time() # Update the tab-closing timer
+
             self.send_response(200)
             self.send_header('Content-type', 'text/plain')
             self.end_headers()
-            # 2. Send back the latest folder modification time
             self.wfile.write(str(get_latest_mtime()).encode())
         else:
             super().do_GET()
@@ -56,19 +79,17 @@ class PianoHandler(http.server.SimpleHTTPRequestHandler):
     def do_POST(self):
 
         # Handle shutdown request from the web UI
-        if self.path == "/shutdown":
+        global SHUTDOWN_TIMER
+        if self.path == '/shutdown':
             self.send_response(200)
+            self.send_header('Content-Type', 'text/plain')
             self.end_headers()
-            print("\nShutdown requested from browser UI. Closing server...")
-            
-            # Use self.server instead of httpd
-            threading.Thread(target=self.server.shutdown).start()
-            self.server.server_close()
+            self.wfile.write(b"grace_period_started")
 
-            try:
-                httpd.server_close()
-            except Exception:
-                pass
+            # Start a 3-second countdown before actually dying
+            cancel_pending_shutdown()
+            SHUTDOWN_TIMER = threading.Timer(3.0, execute_shutdown, [self.server])
+            SHUTDOWN_TIMER.start()
             return
 
         # Handle saving edits from the web UI!

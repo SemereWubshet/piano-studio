@@ -132,3 +132,36 @@ body { font-family: system-ui, sans-serif; background: var(--bg-app); color: var
 .tune-list li { font-size: 0.85rem; padding: 6px 10px; border-radius: 4px; cursor: pointer; color: var(--text-muted); transition: 0.15s; }
 .tune-list li:hover { background: #e2e8f0; color: var(--text-main); }
 .tune-list li.active-tune { background: var(--accent-light); color: var(--accent); font-weight: 600; }
+
+/* --- Modern ABCjs Audio Bar Polish --- */
+
+/* 1. Controller Bar Container */
+.abcjs-inline-audio {
+  display: flex !important;
+  align-items: center !important;
+  background: #1e293b !important; /* Slate-800 */
+  border-radius: 8px !important;
+  padding: 6px 14px !important;
+  height: 42px !important;
+  gap: 8px !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* 2. Control Buttons (Play, Loop, Restart) */
+.abcjs-inline-audio button {
+  background: transparent !important;
+  border: none !important;
+  color: #94a3b8 !important; /* Muted slate */
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+  padding: 4px !important;
+  border-radius: 4px !important;
+  transition: color 0.15s ease, transform 0.1s ease !important;
+}
+
+.abcjs-inline-audio button:hover {
+  color: #f8fafc !important;
+  transform: scale(1.1);
+}
