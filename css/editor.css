@@ -1,0 +1,47 @@
+/* --- Collapsible ABC Editor Drawer --- */
+.editor-drawer {
+    --drawer-w: 420px;
+    width: var(--drawer-w);
+    min-width: 280px;
+    max-width: 75vw;
+    overflow: auto;
+    position: relative;
+    direction: ltr;
+    background: #fafafa;
+    border-left: 4px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    transition: margin-right 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    margin-right: 0;
+}
+
+.editor-drawer.hidden,
+.editor-drawer:not(.open) {
+    margin-right: calc(-1 * var(--drawer-w));
+}
+
+#editor-drawer:hover {
+    border-left-color: var(--accent, #3b82f6);
+}
+
+.drawer-header { 
+    padding: 15px; 
+    border-bottom: 1px solid var(--border); 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+    font-weight: 600; 
+}
+
+#abc-source { 
+    flex: 1; 
+    padding: 15px; 
+    border: none; 
+    outline: none; 
+    resize: none; 
+    font-family: monospace; 
+    font-size: 0.9rem; 
+    background: transparent; 
+}
+

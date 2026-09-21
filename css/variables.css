@@ -1,0 +1,96 @@
+/* --- Variables & Reset --- */
+:root {
+    /* --- Theme Core (Velvety Navy & Slate) --- */
+    --bg-app: #f8fafc;                       /* Crisp light background */
+    --bg-sidebar: #f1f5f9;                   /* Clean slate sidebar */
+    --bg-card: #ffffff;                      /* Crisp white card / sheet stage */
+    --border: #e2e8f0;                       /* Subtle clean divider */
+    --border-focus: #2563eb;                 /* Vibrant navy/royal focus */
+    --text-main: #0f172a;                    /* Deep obsidian slate text */
+    --text-muted: #475569;                   /* Clear readable slate text */
+    --accent: #1d4ed8;                       /* Vibrant rich royal navy */
+    --accent-light: #eff6ff;                 /* Fresh ice-blue highlight tint */
+
+    /* --- Audio Player Theme (Velvety Midnight Navy + Luminous Amber Gold) --- */
+    /* 1. Bar Container & Pill */
+    --player-bg: rgb(26, 26, 83);                    /* Velvety midnight navy pill */
+    --player-border: #334155;                /* Distinct slate border */
+    --player-shadow: 0 4px 16px rgba(15, 23, 42, 0.25); /* Deep rich shadow */
+
+    /* 2. Control Buttons (Play, Restart, Loop) */
+    --player-btn-color: #cbd5e1;             /* Crisp platinum-silver icons */
+    --player-btn-hover-color: #ffffff;       /* Pure glowing white on hover */
+    --player-btn-hover-bg: rgba(255, 255, 255, 0.15); /* Frosted glass hover */
+    --player-btn-active-bg: #f59e0b;         /* Vibrant amber-gold active state */
+    --player-btn-active-icon: #0f172a;       /* Contrasting dark icon for active buttons */
+
+    /* 3. Seeker Track (The groove) */
+    --seeker-track-bg: #1e293b;              /* Clean dark groove */
+    --seeker-track-height: 15px;              /* Groove thickness */
+
+    /* 4. Seeker Fill / Progress (Vibrant Luminous Amber Gold) */
+    --seeker-fill-color: #fbbf24;            /* Vibrant warm amber-gold progress bar */
+    --seeker-fill-hover: #fcd34d;            /* Radiant bright gold on hover */
+    --seeker-fill-active: #f59e0b;           /* Rich honey gold while scrubbing */
+}
+
+* { 
+    margin: 0; 
+    padding: 0; 
+    box-sizing: border-box; 
+}
+
+body { 
+    font-family: system-ui, sans-serif; 
+    background: var(--bg-app); 
+    color: var(--text-main); 
+    height: 100vh; 
+    overflow: hidden; 
+}
+
+/* Common button primitives */
+.btn { 
+    padding: 6px 12px; 
+    border: 1px solid var(--border); 
+    background: var(--bg-card); 
+    border-radius: 6px; 
+    cursor: pointer; 
+    font-weight: 600; 
+    font-size: 0.85rem; 
+    transition: all 0.15s ease;
+}
+
+.btn:hover { 
+    background: var(--bg-sidebar); 
+}
+
+.btn-primary { 
+    background: var(--accent); 
+    color: white; 
+    border-color: var(--accent); 
+}
+
+.btn-primary:hover { 
+    background: #1d4ed8; 
+}
+
+.btn-ghost {
+    background: transparent;
+    border-color: transparent;
+}
+
+.btn-ghost:hover {
+    background: #fee2e2;
+    color: #dc2626;
+}
+
+.btn-sm {
+    padding: 4px 8px;
+    font-size: 0.8rem;
+}
+
+.placeholder, .placeholder-text { 
+    color: var(--text-muted); 
+    font-style: italic; 
+}
+

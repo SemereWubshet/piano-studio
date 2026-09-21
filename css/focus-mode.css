@@ -1,0 +1,86 @@
+/* --- Focus Mode (Sheet Only) --- */
+body.focus-mode #sidebar {
+    display: none !important;
+}
+
+body.focus-mode #top-bar {
+    display: none !important;
+}
+
+body.focus-mode #audio-bar {
+    display: none !important;
+}
+
+body.focus-mode #editor-drawer {
+    display: none !important;
+}
+
+body.focus-mode #sheet-wrapper {
+    padding: 10px 20px !important;
+}
+
+/* Floating Focus Controls Toolbar */
+#focus-controls {
+    position: fixed;
+    top: 14px;
+    right: 18px;
+    z-index: 9999;
+    display: none;
+    background: rgba(30, 41, 59, 0.85);
+    color: #ffffff;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    padding: 4px 8px;
+    border-radius: 20px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    opacity: 0.35;
+    align-items: center;
+    gap: 6px;
+    user-select: none;
+}
+
+#focus-controls:hover {
+    opacity: 1;
+    background: rgba(15, 23, 42, 0.95);
+    transform: translateY(-1px);
+}
+
+body.focus-mode #focus-controls {
+    display: inline-flex;
+}
+
+.focus-btn {
+    background: rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 12px;
+    cursor: pointer;
+    padding: 3px 8px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s ease;
+}
+
+.focus-btn:hover {
+    background: rgba(255, 255, 255, 0.25);
+    color: #ffffff;
+}
+
+.focus-btn.focus-exit {
+    gap: 4px;
+    margin-left: 4px;
+}
+
+#focus-zoom-level {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: #cbd5e1;
+    min-width: 36px;
+    text-align: center;
+}
+

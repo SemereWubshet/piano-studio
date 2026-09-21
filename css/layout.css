@@ -1,0 +1,57 @@
+/* --- Core Layout & Stage --- */
+#app-container { 
+    display: flex; 
+    height: 100vh; 
+    width: 100vw; 
+}
+
+#main-stage { 
+    flex: 1; 
+    display: flex; 
+    flex-direction: column; 
+    background: var(--bg-card); 
+    min-width: 0; 
+}
+
+#top-bar { 
+    padding: 14px 20px; 
+    border-bottom: 1px solid var(--border); 
+}
+
+#active-score-title { 
+    font-size: 1.25rem; 
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding: 0 16px;
+}
+
+#workspace-body { 
+    flex: 1; 
+    display: flex; 
+    overflow: hidden; 
+    position: relative; 
+}
+
+#sheet-wrapper { 
+    flex: 1; 
+    overflow: auto; 
+    padding: 40px; 
+}
+
+#paper { 
+    display: inline-block; 
+    transform-origin: top left; 
+    transition: transform 0.2s ease; 
+}
+
+/* Ensure ABCJS SVG fills cleanly */
+#paper svg { 
+    max-width: none; 
+}
+
+/* ABCJS Custom Cursor Override (Note Highlight) */
+.abcjs-note_selected { 
+    fill: var(--accent) !important; 
+}
+

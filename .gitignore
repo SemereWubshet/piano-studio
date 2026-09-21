@@ -3,6 +3,9 @@
 scores/*
 !scores/sample.abc
 
+# Agents
+/.agents/
+
 # OS files
 .DS_Store
 Thumbs.db
