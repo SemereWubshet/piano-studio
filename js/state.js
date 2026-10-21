@@ -13,6 +13,9 @@ export const state = {
     zoomLevel: 1.0,
     isFocusMode: false,
     synthControl: null,
+    currentVisualObj: null, // Active ABCJS visualObj for timing/wait-mode
+    isWaitMode: false,      // Interactive Wait-For-Me practice mode
+    isRecordingMidi: false, // Live MIDI-to-ABC editor recording
     lastFolderSyncTime: "0",
     isShuttingDown: false,
 };

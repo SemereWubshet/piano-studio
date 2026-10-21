@@ -126,7 +126,7 @@ export function initFocusAndZoomControls() {
             e.preventDefault();
             const playBtn = document.querySelector('.abcjs-midi-start');
             if (playBtn) playBtn.click();
-        } else if (e.key === 'r' || e.key === 'R') {
+        } else if ((e.key === 'r' || e.key === 'R') && !e.ctrlKey && !e.metaKey) {
             e.preventDefault();
             const loopBtn = document.querySelector('.abcjs-midi-loop');
             if (loopBtn) loopBtn.click();

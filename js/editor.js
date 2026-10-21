@@ -82,6 +82,14 @@ export function initEditorControls(onSavedCallback) {
     }
 
     if (drawer) {
+        // Ctrl + Enter to save score changes
+        drawer.addEventListener('keydown', (e) => {
+            if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                e.preventDefault();
+                saveCurrentTune(onSavedCallback);
+            }
+        });
+
         drawer.addEventListener('mousedown', (e) => {
             if (e.offsetX > 8) return;
             e.preventDefault();

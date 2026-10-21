@@ -34,6 +34,161 @@
     font-weight: 600; 
 }
 
+.drawer-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-record {
+    background: #ffffff;
+    border: 1px solid #fca5a5;
+    color: #dc2626;
+    font-weight: 600;
+}
+
+.btn-record:hover {
+    background: #fef2f2;
+}
+
+.btn-record.recording {
+    background: #dc2626 !important;
+    border-color: #b91c1c !important;
+    color: #ffffff !important;
+    animation: recPulse 1.2s infinite ease-in-out;
+}
+
+@keyframes recPulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.45); }
+    50% { box-shadow: 0 0 0 6px rgba(220, 38, 38, 0); }
+}
+
+/* --- Top Bar USB MIDI Status Pill & Toast --- */
+.voice-picker-container {
+    display: inline-flex;
+    align-items: center;
+}
+
+.select-piano-voice {
+    background: #ffffff;
+    border: 1px solid var(--border, #cbd5e1);
+    border-radius: 20px;
+    padding: 4px 10px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #0f172a;
+    outline: none;
+    cursor: pointer;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+    transition: border-color 0.15s ease;
+}
+
+.select-piano-voice:hover,
+.select-piano-voice:focus {
+    border-color: var(--accent, #1d4ed8);
+}
+
+.btn-sustain {
+    background: #ffffff;
+    border: 1px solid var(--border, #cbd5e1);
+    color: var(--text-secondary, #475569);
+    border-radius: 20px;
+    padding: 4px 10px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    cursor: pointer;
+    user-select: none;
+    transition: all 0.15s ease;
+}
+
+.btn-sustain:hover {
+    background: #f1f5f9;
+}
+
+.btn-sustain.active {
+    background: #0f172a !important;
+    color: #fbbf24 !important;
+    border-color: rgba(251, 191, 36, 0.5) !important;
+    box-shadow: 0 0 10px rgba(251, 191, 36, 0.25);
+}
+
+.midi-status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    background: #f1f5f9;
+    border: 1px solid var(--border, #cbd5e1);
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: #334155;
+    cursor: pointer;
+    user-select: none;
+    transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.midi-status-pill:hover {
+    background: #e2e8f0;
+}
+
+.midi-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.midi-dot.connected {
+    background: #10b981;
+    box-shadow: 0 0 8px rgba(16, 185, 129, 0.7);
+}
+
+.midi-dot.waiting {
+    background: #f59e0b;
+}
+
+.midi-dot.disconnected {
+    background: #94a3b8;
+}
+
+.midi-sound-btn {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-size: 0.85rem;
+    padding: 0 2px;
+    line-height: 1;
+}
+
+.midi-sound-btn.muted {
+    opacity: 0.55;
+}
+
+/* Studio Floating Toast */
+.studio-toast {
+    position: fixed;
+    top: 64px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(15, 23, 42, 0.94);
+    color: #fbbf24;
+    border: 1px solid rgba(251, 191, 36, 0.4);
+    border-radius: 20px;
+    padding: 8px 18px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+    z-index: 10000;
+    pointer-events: none;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.studio-toast.hidden {
+    opacity: 0;
+    transform: translate(-50%, -8px);
+}
+
 #abc-source { 
     flex: 1; 
     padding: 15px; 

@@ -12,8 +12,10 @@ A lightweight, local piano practice studio that syncs directly with your local f
 
 - 🎼 **Live ABC Sheet Music Rendering:** Automatically renders multi-tune ABC files into clean, interactive musical scores.
 - 🔊 **Integrated Web Audio Playback:** Synth playback with real-time note highlighting, looping, lead-in countdown, and tempo warp.
-- 🎹 **Interactive Light-Up Piano:** A bottom piano tray (C2-C7) with acoustic sound synthesis.
-- ✏️ **In-Browser ABC Editor:** Slide out a side drawer to edit ABC code on the fly and save changes straight back to disk with automatic file reloads.
+- 🎹 **Interactive Light-Up Piano & USB MIDI Mirror:** A full-width bottom piano tray (C2-C7) with velocity-sensitive acoustic sound synthesis, multiple selectable piano voices (Concert Grand, Warm Upright, Rhodes EP, CP80, Synth Keyboard), toggleable Sustain Pedal, and live USB MIDI hardware mirroring.
+- 🎯 **"Wait-For-Me" Practice Mode:** Interactive sheet follower that pauses on each note or polyphonic chord until you play the exact keys on your USB MIDI keyboard (highlighting target notes in gold, correct notes in emerald, and wrong notes in crimson).
+- 🔴 **Live MIDI-to-ABC Recorder:** Play melodies or chords on your physical MIDI keyboard to transcribe them directly into clean ABC notation with automatic barlines and live sheet music preview.
+- ✏️ **In-Browser ABC Editor:** Slide out a side drawer to edit ABC code on the fly and save changes straight back to disk with automatic file reloads (<kbd>Ctrl</kbd> + <kbd>Enter</kbd>).
 - 🛑 **Smart Auto-Shutdown:** Tab-close watchdog automatically terminates the background server and frees port 8000 when you are done practicing.
 
 ---
@@ -22,8 +24,10 @@ A lightweight, local piano practice studio that syncs directly with your local f
 
 | Shortcut | Action |
 |---|---|
+| <kbd>Ctrl</kbd> + <kbd>Enter</kbd> | Save changes in ABC Code Editor |
 | <kbd>P</kbd> | Play / Pause Audio Playback |
 | <kbd>R</kbd> | Toggle Repeat / Loop Playback |
+| <kbd>W</kbd> | Toggle "Wait-For-Me" Interactive Practice Mode |
 | <kbd>K</kbd> | Toggle Light-Up Piano Tray |
 | <kbd>F</kbd> | Toggle Focus Mode (maximize sheet music) |
 | <kbd>Esc</kbd> | Exit Focus Mode |
@@ -31,8 +35,9 @@ A lightweight, local piano practice studio that syncs directly with your local f
 | <kbd>-</kbd> or <kbd>_</kbd> | Zoom Out |
 | <kbd>0</kbd> | Reset Zoom to 100% |
 | <kbd>Ctrl</kbd> + Mouse Wheel | Zoom in/out smoothly over sheet music |
+| <kbd>Ctrl</kbd> + <kbd>R</kbd> | Reload browser page (standard browser behavior preserved) |
 
-*(Keyboard shortcuts are automatically suppressed while typing in the ABC editor.)*
+*(Keyboard shortcuts are automatically suppressed while typing in the ABC editor, except <kbd>Ctrl</kbd> + <kbd>Enter</kbd> to save.)*
 
 ---
 
@@ -47,16 +52,20 @@ piano-studio/
 │   ├── layout.css         # Main app shell, stage, and paper canvas
 │   ├── sidebar.css        # Tree navigation, folders, and tunes list
 │   ├── audio-bar.css      # Custom player bar styling, buttons, seeker track
-│   ├── editor.css         # ABC raw code drawer and save controls
+│   ├── editor.css         # ABC raw code drawer, MIDI status pill, recorder UI
 │   ├── focus-mode.css     # Focus mode layout overrides & floating glass controls
-│   └── piano-keyboard.css # Bottom light-up piano dock, keys, and drag handle
+│   └── piano-keyboard.css # Bottom light-up piano dock, keys, and MIDI states
 ├── js/
-│   ├── state.js           # Central state store (active file, zoom, tunes)
+│   ├── state.js           # Central state store (active file, zoom, tunes, modes)
 │   ├── api.js             # HTTP communication (scores, save, heartbeat, shutdown)
 │   ├── music-engine.js    # ABCJS score rendering & synth audio controller
 │   ├── countdown.js       # Lead-in timer controller, audio metronome ticks
 │   ├── piano-keyboard.js  # 61-key piano DOM, note lighting, and tray resizing
-│   ├── piano-synth.js     # Acoustic piano Web Audio multi-string synthesis
+│   ├── piano-synth.js     # Velocity-sensitive acoustic piano Web Audio synth
+│   ├── midi-engine.js     # Web MIDI API connection, hot-plugging, event bus
+│   ├── wait-mode.js       # Interactive "Wait-For-Me" note/chord practice engine
+│   ├── midi-shortcuts.js  # Hands-free sustain pedal and edge-key controls
+│   ├── midi-recorder.js   # Live MIDI-to-ABC notation transcriber
 │   ├── sidebar.js         # Tree accordion rendering & sidebar drag resizing
 │   ├── editor.js          # Code drawer toggling, resizing, and save logic
 │   ├── focus-controls.js  # Focus mode toggles, 60fps smooth zoom math, centering

@@ -7,6 +7,7 @@
 import { state } from './state.js';
 import { getLeadInSeconds, startCountdown, cancelCountdown, getIsCountingDown } from './countdown.js';
 import { lightUpKeys, clearLitKeys } from './piano-keyboard.js';
+import { refreshWaitModeForNewScore, resetWaitModeToStart, toggleWaitMode } from './wait-mode.js';
 
 export function parseTunes(abcText) {
     if (!abcText) return [];
@@ -30,8 +31,12 @@ export function renderMusicScore(paperElementId = 'paper') {
         staffwidth: 760
     });
 
+    state.currentVisualObj = visualObjs[0] || null;
+
     if (ABCJS.synth.supportsAudio() && visualObjs.length > 0) {
         setupAudioController(visualObjs[0]);
+    } else {
+        refreshWaitModeForNewScore(state.currentVisualObj);
     }
 
     return currentTuneAbc;
@@ -54,14 +59,32 @@ export function setupAudioController(visualObj) {
                 });
             }
 
-            // Light up piano keys with duration and re-strike support
+            // Light up piano keys with duration, warp (speed %), and re-strike support
             if (ev && ev.midiPitches && ev.midiPitches.length > 0) {
-                const msPerMeasure = (visualObj && typeof visualObj.millisecondsPerMeasure === 'function') 
+                // Read the active tempo warp percentage (e.g. 50%, 100%, 150%)
+                const warpInput = document.querySelector('.abcjs-midi-tempo');
+                const warpPercent = warpInput ? (parseFloat(warpInput.value) || 100) : 100;
+                const speedMultiplier = Math.max(0.1, warpPercent / 100);
+
+                const baseMsPerMeasure = (visualObj && typeof visualObj.millisecondsPerMeasure === 'function') 
                     ? visualObj.millisecondsPerMeasure() 
                     : 2000;
+                
+                // When speed is 50%, notes last TWICE as long (/ 0.5). When 200%, HALF as long (/ 2.0).
+                const msPerMeasure = baseMsPerMeasure / speedMultiplier;
+                
+                let eventDurationMs = null;
+                if (typeof ev.duration === 'number') {
+                    if (ev.duration > 0 && ev.duration <= 4.0) {
+                        eventDurationMs = ev.duration * msPerMeasure;
+                    } else if (ev.duration > 4.0) {
+                        eventDurationMs = ev.duration / speedMultiplier;
+                    }
+                }
+
                 lightUpKeys(ev.midiPitches, {
                     msPerMeasure,
-                    eventDurationMs: ev.duration
+                    eventDurationMs
                 });
             } else {
                 clearLitKeys();
@@ -93,6 +116,7 @@ export function setupAudioController(visualObj) {
     createSynth.init({ visualObj }).then(() => {
         state.synthControl.setTune(visualObj, true, { program: 0 }).then(() => {
             attachPlayLeadInHook(audioControlsEl);
+            refreshWaitModeForNewScore(visualObj);
         });
     });
 }
@@ -107,6 +131,11 @@ function attachPlayLeadInHook(container) {
     playBtn.dataset.leadinAttached = "true";
 
     playBtn.addEventListener('click', (event) => {
+        // Exit Wait Mode if the user hits automated Play
+        if (state.isWaitMode) {
+            toggleWaitMode(false);
+        }
+
         // If clicking while counting down, cancel it
         if (getIsCountingDown()) {
             event.preventDefault();
@@ -131,11 +160,14 @@ function attachPlayLeadInHook(container) {
         }
     }, true); // Use capture phase so we intercept before ABCJS internal listener
 
-    // Also cancel countdown if user clicks the reset button
+    // Also cancel countdown / reset Wait Mode if user clicks the reset button
     const resetBtn = container.querySelector('.abcjs-midi-reset');
     if (resetBtn) {
         resetBtn.addEventListener('click', () => {
             cancelCountdown();
+            if (state.isWaitMode) {
+                resetWaitModeToStart();
+            }
         });
     }
 }

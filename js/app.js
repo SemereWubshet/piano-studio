@@ -12,6 +12,11 @@ import { updateEditorContent, initEditorControls } from './editor.js';
 import { initFocusAndZoomControls, centerSheetMusic } from './focus-controls.js';
 import { initCountdownUI } from './countdown.js';
 import { initPianoKeyboard } from './piano-keyboard.js';
+import { initMidiEngine, showStudioToast } from './midi-engine.js';
+import { initWaitMode } from './wait-mode.js';
+import { initMidiShortcuts } from './midi-shortcuts.js';
+import { initMidiRecorder } from './midi-recorder.js';
+import { getCurrentVoiceId, setPianoVoice, getIsSustainEnabled, toggleSustainPedal } from './piano-synth.js';
 
 class PianoStudioApp {
     async init() {
@@ -21,10 +26,46 @@ class PianoStudioApp {
         initFocusAndZoomControls();
         initCountdownUI();
         initPianoKeyboard();
+        this.initVoiceSelector();
+        this.initSustainToggle();
+        initWaitMode();
+        initMidiShortcuts();
+        initMidiRecorder();
+        initMidiEngine();
 
         await this.loadAllScores();
         startHeartbeatMonitor(() => this.loadAllScores());
         checkHeartbeat(); // Cancel immediate shutdown timer
+    }
+
+    initVoiceSelector() {
+        const selectEl = document.getElementById('select-piano-voice');
+        if (selectEl) {
+            selectEl.value = getCurrentVoiceId();
+            selectEl.addEventListener('change', (e) => {
+                setPianoVoice(e.target.value);
+                const chosenOption = selectEl.options[selectEl.selectedIndex];
+                showStudioToast(`Tone: ${chosenOption ? chosenOption.text : e.target.value}`);
+            });
+        }
+    }
+
+    initSustainToggle() {
+        const sustainBtn = document.getElementById('btn-toggle-sustain');
+        if (sustainBtn) {
+            const updateUI = () => {
+                const isEnabled = getIsSustainEnabled();
+                sustainBtn.classList.toggle('active', isEnabled);
+                sustainBtn.innerHTML = `<span class="sustain-pedal-icon">🦶</span> <span>Sustain: ${isEnabled ? 'ON' : 'OFF'}</span>`;
+            };
+            updateUI();
+
+            sustainBtn.addEventListener('click', () => {
+                const nowEnabled = toggleSustainPedal();
+                updateUI();
+                showStudioToast(nowEnabled ? '🦶 Sustain Pedal: ON' : '🦶 Sustain Pedal: OFF');
+            });
+        }
     }
 
     async loadAllScores() {

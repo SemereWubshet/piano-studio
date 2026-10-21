@@ -2,17 +2,18 @@
  * Piano Studio - Bottom Piano Keyboard Component
  *
  * Full-width 61-key piano keyboard (C2 to C7 / MIDI 36 to 96),
- * draggable height resizing, and duration-accurate chord lighting.
+ * draggable height resizing, duration-accurate chord lighting,
+ * and physical USB MIDI mirror + Wait Mode target/error states.
  */
 
-import { playAcousticPianoSound } from './piano-synth.js';
+import { playAcousticPianoSound, stopAcousticPianoSound } from './piano-synth.js';
+import { dispatchMidiNote } from './midi-engine.js';
 
 const STORAGE_OPEN_KEY = 'piano_studio_keyboard_open';
 const STORAGE_HEIGHT_KEY = 'piano_studio_keyboard_height';
 const START_MIDI = 36; // C2
 const END_MIDI = 96;   // C7 (61 keys total: 36 white, 25 black)
 
-// Offsets in semitones: 0=C, 1=C#, 2=D, 3=D#, 4=E, 5=F, 6=F#, 7=G, 8=G#, 9=A, 10=A#, 11=B
 const BLACK_KEY_OFFSETS = [1, 3, 6, 8, 10];
 
 let isTrayOpen = localStorage.getItem(STORAGE_OPEN_KEY) === 'true';
@@ -34,13 +35,22 @@ export function buildPianoDOM() {
 
         keyboardEl.appendChild(keyEl);
 
-        // Click interaction with acoustic piano synthesis
-        keyEl.addEventListener('mousedown', () => {
+        // Mouse click interaction triggers acoustic synth + dispatches to MIDI bus
+        keyEl.addEventListener('mousedown', (e) => {
+            e.preventDefault();
             triggerKeyAnimation(keyEl);
-            playAcousticPianoSound(midi);
+            playAcousticPianoSound(midi, 95);
+            dispatchMidiNote(midi, 95, true, 'mouse');
         });
-        keyEl.addEventListener('mouseup', () => keyEl.classList.remove('active', 're-strike'));
-        keyEl.addEventListener('mouseleave', () => keyEl.classList.remove('active', 're-strike'));
+        const releaseMouseKey = () => {
+            if (keyEl.classList.contains('midi-user-active') || keyEl.classList.contains('active')) {
+                keyEl.classList.remove('active', 're-strike');
+                stopAcousticPianoSound(midi);
+                dispatchMidiNote(midi, 0, false, 'mouse');
+            }
+        };
+        keyEl.addEventListener('mouseup', releaseMouseKey);
+        keyEl.addEventListener('mouseleave', releaseMouseKey);
     }
 
     updateBlackKeyPositions();
@@ -75,8 +85,49 @@ export function updateBlackKeyPositions() {
 
 function triggerKeyAnimation(keyEl) {
     keyEl.classList.remove('re-strike', 'active');
-    void keyEl.offsetWidth; // Force layout reflow
+    void keyEl.offsetWidth;
     keyEl.classList.add('active', 're-strike');
+}
+
+/**
+ * Mirrors physical USB MIDI (or mouse) key presses onto the virtual keyboard.
+ */
+export function setUserMidiKeyVisual(midi, isPressed) {
+    const keyEl = document.querySelector(`.piano-key[data-midi="${midi}"]`);
+    if (!keyEl) return;
+    if (isPressed) {
+        keyEl.classList.remove('re-strike');
+        void keyEl.offsetWidth;
+        keyEl.classList.add('midi-user-active', 're-strike');
+    } else {
+        keyEl.classList.remove('midi-user-active', 'midi-wrong', 're-strike');
+    }
+}
+
+/**
+ * Highlights Wait-For-Me target keys and already-satisfied chord keys.
+ */
+export function renderWaitModeKeyTargets(targetPitches = [], satisfiedPitches = new Set()) {
+    document.querySelectorAll('.piano-key.wait-target, .piano-key.midi-correct').forEach(el => {
+        el.classList.remove('wait-target', 'midi-correct');
+    });
+
+    targetPitches.forEach(midi => {
+        const keyEl = document.querySelector(`.piano-key[data-midi="${midi}"]`);
+        if (!keyEl) return;
+        if (satisfiedPitches.has(midi)) {
+            keyEl.classList.add('midi-correct');
+        } else {
+            keyEl.classList.add('wait-target');
+        }
+    });
+}
+
+export function flashWrongMidiKey(midi) {
+    const keyEl = document.querySelector(`.piano-key[data-midi="${midi}"]`);
+    if (!keyEl) return;
+    keyEl.classList.add('midi-wrong');
+    setTimeout(() => keyEl.classList.remove('midi-wrong'), 450);
 }
 
 export function lightUpKeys(pitchArray, timingInfo = null) {
@@ -85,8 +136,7 @@ export function lightUpKeys(pitchArray, timingInfo = null) {
         return;
     }
 
-    const newPitchesMap = new Map(); // midiNum -> calculatedDurationMs
-
+    const newPitchesMap = new Map();
     const msPerMeasure = (timingInfo && timingInfo.msPerMeasure) ? timingInfo.msPerMeasure : 2000;
     const fallbackMs = (timingInfo && timingInfo.eventDurationMs) ? timingInfo.eventDurationMs : null;
 
@@ -95,22 +145,17 @@ export function lightUpKeys(pitchArray, timingInfo = null) {
         if (midiNum === undefined) return;
 
         let noteDurationMs = null;
-        if (typeof p === 'object' && p.durationInMeasures) {
+        if (typeof p === 'object' && typeof p.durationInMeasures === 'number') {
             noteDurationMs = p.durationInMeasures * msPerMeasure;
-        } else if (typeof p === 'object' && p.duration) {
-            noteDurationMs = p.duration * 1000;
+        } else if (typeof p === 'object' && typeof p.duration === 'number') {
+            // If duration <= 4.0, it is represented in whole-note fractions (1.0 = whole note)
+            noteDurationMs = (p.duration <= 4.0) ? p.duration * msPerMeasure : p.duration;
         } else if (fallbackMs) {
             noteDurationMs = fallbackMs;
         }
-
         newPitchesMap.set(midiNum, noteDurationMs);
     });
 
-    // 1. Clear ONLY pitches that have expired or are explicitly not part of the active polyphony
-    // In multi-voice piano music, a bass chord should continue ringing while the treble plays faster notes!
-    // Therefore, do NOT abruptly kill bass notes just because a treble event arrived.
-    
-    // 2. Light up and strike the active keys in this event
     newPitchesMap.forEach((durationMs, midiNum) => {
         const keyEl = document.querySelector(`.piano-key[data-midi="${midiNum}"]`);
         if (!keyEl) return;
@@ -118,19 +163,17 @@ export function lightUpKeys(pitchArray, timingInfo = null) {
         triggerKeyAnimation(keyEl);
         activeKeyPitches.add(keyEl);
 
-        // Clear any previous timeout for this specific key
         if (activeKeyTimeouts.has(midiNum)) {
             clearTimeout(activeKeyTimeouts.get(midiNum));
             activeKeyTimeouts.delete(midiNum);
         }
 
-        // Schedule key release strictly when its musical duration ends
         if (durationMs && durationMs > 0) {
             const timeoutId = setTimeout(() => {
                 keyEl.classList.remove('active', 're-strike');
                 activeKeyPitches.delete(keyEl);
                 activeKeyTimeouts.delete(midiNum);
-            }, Math.max(60, durationMs - 35)); // 35ms release cushion
+            }, Math.max(60, durationMs - 15)); // Minimal 15ms release cushion for crisp legato/re-strike
             activeKeyTimeouts.set(midiNum, timeoutId);
         }
     });
@@ -170,7 +213,6 @@ export function initPianoKeyboard() {
 
     togglePianoTray(isTrayOpen);
 
-    // Draggable Top Border Resizing
     const handleEl = document.getElementById('piano-resize-handle');
     if (handleEl && dockEl) {
         handleEl.addEventListener('mousedown', (e) => {
@@ -203,10 +245,17 @@ export function initPianoKeyboard() {
     }
 
     document.getElementById('btn-toggle-keyboard')?.addEventListener('click', () => togglePianoTray());
+    window.addEventListener('resize', () => { if (isTrayOpen) updateBlackKeyPositions(); });
 
-    window.addEventListener('resize', () => {
-        if (isTrayOpen) updateBlackKeyPositions();
-    });
+    // Automatically reposition black keys whenever #piano-keyboard width changes
+    // (e.g. sidebar collapse/expand animation, sidebar drag resize, editor drawer toggle)
+    const keyboardEl = document.getElementById('piano-keyboard');
+    if (keyboardEl && window.ResizeObserver) {
+        const ro = new ResizeObserver(() => {
+            if (isTrayOpen) updateBlackKeyPositions();
+        });
+        ro.observe(keyboardEl);
+    }
 
     window.addEventListener('keydown', (e) => {
         if (e.target && (e.target.tagName === 'TEXTAREA' || e.target.tagName === 'INPUT')) return;
