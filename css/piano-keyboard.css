@@ -1,0 +1,148 @@
+/* --- Bottom Piano Dock & Key Styling --- */
+#piano-dock {
+    --piano-h: 150px;
+    position: relative;
+    width: 100%;
+    height: var(--piano-h);
+    min-height: 90px;
+    max-height: 350px;
+    background: #0b1120;
+    border-top: 2px solid var(--border, #334155);
+    box-shadow: 0 -8px 25px rgba(0, 0, 0, 0.45);
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    z-index: 100;
+    padding: 0 12px 10px;
+    box-sizing: border-box;
+    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    flex-shrink: 0;
+}
+
+#piano-dock.open {
+    display: flex;
+}
+
+/* Drag to resize top handle */
+.piano-resize-handle {
+    width: 100%;
+    height: 8px;
+    cursor: row-resize;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 4px;
+    user-select: none;
+}
+
+.piano-resize-handle::before {
+    content: '';
+    width: 48px;
+    height: 4px;
+    background: rgba(148, 163, 184, 0.4);
+    border-radius: 2px;
+    transition: background-color 0.15s ease, width 0.15s ease;
+}
+
+.piano-resize-handle:hover::before {
+    background: #fbbf24;
+    width: 64px;
+}
+
+/* Full available width container */
+.piano-scroll-container {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    display: flex;
+    justify-content: stretch;
+    box-sizing: border-box;
+}
+
+/* Keyboard Stage */
+.piano-keyboard {
+    position: relative;
+    display: flex;
+    width: 100%;
+    height: 100%;
+    background: #0f172a;
+    border-radius: 6px;
+    padding: 0 4px 4px;
+    box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.7);
+    user-select: none;
+    box-sizing: border-box;
+}
+
+/* White Keys - Flex grow to occupy 100% of the available width */
+.piano-key.white-key {
+    flex: 1 1 0;
+    min-width: 0;
+    height: 100%;
+    background: linear-gradient(to bottom, #f8fafc 0%, #e2e8f0 100%);
+    border: 1px solid #94a3b8;
+    border-top: none;
+    border-radius: 0 0 5px 5px;
+    box-shadow: inset 0 1px 0 #ffffff, 0 3px 3px rgba(0, 0, 0, 0.25);
+    box-sizing: border-box;
+    cursor: pointer;
+    position: relative;
+    z-index: 1;
+    pointer-events: auto;
+}
+
+/* Black Keys - Absolute positioned, proportional height */
+.piano-key.black-key {
+    height: 64%;
+    background: linear-gradient(to bottom, #1e293b 0%, #090d16 100%);
+    border: 1px solid #000000;
+    border-radius: 0 0 4px 4px;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.6);
+    box-sizing: border-box;
+    cursor: pointer;
+    position: absolute;
+    top: 0;
+    z-index: 2;
+    pointer-events: auto;
+}
+
+/* Active / Lit State (Golden Warm Glow) */
+.piano-key.white-key.active {
+    background: linear-gradient(to bottom, #fde68a 0%, #fbbf24 100%) !important;
+    box-shadow: 0 0 16px #fbbf24, inset 0 2px 4px rgba(0, 0, 0, 0.2) !important;
+    transform: translateY(2px);
+}
+
+.piano-key.black-key.active {
+    background: linear-gradient(to bottom, #d97706 0%, #b45309 100%) !important;
+    border-color: #fbbf24 !important;
+    box-shadow: 0 0 14px #fbbf24, inset 0 1px 2px rgba(255, 255, 255, 0.3) !important;
+    transform: translateY(2px);
+}
+
+/* Re-strike release/tap key animation */
+@keyframes keyReStrike {
+    0% {
+        transform: translateY(0);
+        filter: brightness(0.9);
+    }
+    30% {
+        transform: translateY(3px);
+        filter: brightness(1.25);
+    }
+    100% {
+        transform: translateY(2px);
+        filter: brightness(1);
+    }
+}
+
+.piano-key.re-strike {
+    animation: keyReStrike 0.12s ease-out forwards;
+}
+
+/* Top toolbar toggle button active state */
+#btn-toggle-keyboard.active {
+    color: #fbbf24 !important;
+    border-color: rgba(251, 191, 36, 0.4) !important;
+    background: rgba(251, 191, 36, 0.1) !important;
+}
+

@@ -6,6 +6,7 @@
 
 import { state, toggleExpandedFile } from './state.js';
 import { parseTunes } from './music-engine.js';
+import { centerSheetMusic } from './focus-controls.js';
 
 export function renderSidebar(onSelectTune) {
     const fileListEl = document.getElementById('file-list');
@@ -75,6 +76,7 @@ export function initSidebarControls() {
         toggleSidebarBtn.addEventListener("click", () => {
             sidebarEl.style.setProperty('--sidebar-w', `${sidebarEl.offsetWidth}px`);
             sidebarEl.classList.toggle("collapsed");
+            setTimeout(centerSheetMusic, 280);
         });
     }
 

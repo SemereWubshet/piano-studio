@@ -9,7 +9,9 @@ import { fetchScoreList, fetchScoreContent, sendShutdownSignal, checkHeartbeat, 
 import { renderMusicScore } from './music-engine.js';
 import { renderSidebar, initSidebarControls } from './sidebar.js';
 import { updateEditorContent, initEditorControls } from './editor.js';
-import { initFocusAndZoomControls } from './focus-controls.js';
+import { initFocusAndZoomControls, centerSheetMusic } from './focus-controls.js';
+import { initCountdownUI } from './countdown.js';
+import { initPianoKeyboard } from './piano-keyboard.js';
 
 class PianoStudioApp {
     async init() {
@@ -17,6 +19,8 @@ class PianoStudioApp {
         initSidebarControls();
         initEditorControls(() => this.onScoreModified());
         initFocusAndZoomControls();
+        initCountdownUI();
+        initPianoKeyboard();
 
         await this.loadAllScores();
         startHeartbeatMonitor(() => this.loadAllScores());
@@ -52,12 +56,14 @@ class PianoStudioApp {
         renderSidebar((f, idx) => this.selectTune(f, idx));
         const activeTuneCode = renderMusicScore('paper');
         updateEditorContent(activeTuneCode);
+        centerSheetMusic();
     }
 
     onScoreModified() {
         renderSidebar((f, idx) => this.selectTune(f, idx));
         const activeTuneCode = renderMusicScore('paper');
         updateEditorContent(activeTuneCode);
+        centerSheetMusic();
     }
 
     setupSystemLifecycle() {

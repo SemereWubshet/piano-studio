@@ -55,10 +55,23 @@
                 <div id="midi-audio-controls">
                     <span class="placeholder-text">Audio controls will appear here...</span>
                 </div>
+                <div id="lead-in-container" class="lead-in-control" title="Lead-in timer before playback starts (in seconds)">
+                    <span class="lead-in-label">⏳ Lead-in:</span>
+                    <input type="number" id="lead-in-input" min="0" max="30" step="1" value="3" aria-label="Lead-in seconds">
+                    <span class="lead-in-unit">s</span>
+                    <span id="lead-in-badge" class="lead-in-badge hidden" title="Counting down... Click to cancel">3</span>
+                </div>
                 <div class="view-controls">
                     <button id="btn-zoom-out" class="btn" title="Zoom Out">-</button>
                     <button id="btn-zoom-in" class="btn" title="Zoom In">+</button>
                     <button id="btn-toggle-editor" class="btn">Toggle Editor</button>
+                    <button id="btn-toggle-keyboard" class="btn" title="Toggle Light-Up Piano Keyboard (K)">
+                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle; margin-right: 4px;">
+                            <rect x="2" y="4" width="20" height="16" rx="2"/>
+                            <path d="M6 4v9m4-9v9m4-9v9m4-9v9"/>
+                        </svg>
+                        <span>Piano (K)</span>
+                    </button>
                     <button id="btn-toggle-focus" class="btn" title="Focus Mode (Maximize Sheet) (F)">
                         <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle; margin-right: 4px;">
                             <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
@@ -71,7 +84,9 @@
             <div id="workspace-body">
                 
                 <div id="sheet-wrapper">
-                    <div id="paper"></div> 
+                    <div id="paper-stage">
+                        <div id="paper"></div>
+                    </div> 
                 </div>
 
                 <div id="editor-drawer" class="editor-drawer hidden">
@@ -83,6 +98,14 @@
                 </div>
 
             </div>
+
+            <!-- Bottom Interactive Piano Dock -->
+            <footer id="piano-dock">
+                <div class="piano-resize-handle" id="piano-resize-handle" title="Drag to resize piano height"></div>
+                <div class="piano-scroll-container">
+                    <div id="piano-keyboard" class="piano-keyboard"></div>
+                </div>
+            </footer>
         </main>
     </div>
 

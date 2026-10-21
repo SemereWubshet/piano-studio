@@ -5,6 +5,8 @@
  */
 
 import { state } from './state.js';
+import { getLeadInSeconds, startCountdown, cancelCountdown, getIsCountingDown } from './countdown.js';
+import { lightUpKeys, clearLitKeys } from './piano-keyboard.js';
 
 export function parseTunes(abcText) {
     if (!abcText) return [];
@@ -12,6 +14,9 @@ export function parseTunes(abcText) {
 }
 
 export function renderMusicScore(paperElementId = 'paper') {
+    cancelCountdown();
+    clearLitKeys();
+
     if (state.synthControl) {
         state.synthControl.pause();
     }
@@ -48,9 +53,23 @@ export function setupAudioController(visualObj) {
                     noteArray.forEach(svgNode => svgNode.classList.add('abcjs-note_selected'));
                 });
             }
+
+            // Light up piano keys with duration and re-strike support
+            if (ev && ev.midiPitches && ev.midiPitches.length > 0) {
+                const msPerMeasure = (visualObj && typeof visualObj.millisecondsPerMeasure === 'function') 
+                    ? visualObj.millisecondsPerMeasure() 
+                    : 2000;
+                lightUpKeys(ev.midiPitches, {
+                    msPerMeasure,
+                    eventDurationMs: ev.duration
+                });
+            } else {
+                clearLitKeys();
+            }
         },
         onFinished: () => {
             document.querySelectorAll('.abcjs-note_selected').forEach(el => el.classList.remove('abcjs-note_selected'));
+            clearLitKeys();
         }
     };
 
@@ -62,9 +81,62 @@ export function setupAudioController(visualObj) {
         displayWarp: true
     });
 
+    // Add keyboard shortcut tooltips to the ABCJS generated buttons
+    const playBtn = audioControlsEl.querySelector('.abcjs-midi-start');
+    if (playBtn) playBtn.title = "Play / Pause (P)";
+    const loopBtn = audioControlsEl.querySelector('.abcjs-midi-loop');
+    if (loopBtn) loopBtn.title = "Toggle Loop / Repeat (R)";
+    const resetBtn = audioControlsEl.querySelector('.abcjs-midi-reset');
+    if (resetBtn) resetBtn.title = "Reset to Start";
+
     const createSynth = new ABCJS.synth.CreateSynth();
     createSynth.init({ visualObj }).then(() => {
-        state.synthControl.setTune(visualObj, true, { program: 0 });
+        state.synthControl.setTune(visualObj, true, { program: 0 }).then(() => {
+            attachPlayLeadInHook(audioControlsEl);
+        });
     });
+}
+
+/**
+ * Intercepts the ABCJS Play button click to trigger the lead-in countdown.
+ */
+function attachPlayLeadInHook(container) {
+    const playBtn = container.querySelector('.abcjs-midi-start');
+    if (!playBtn || playBtn.dataset.leadinAttached) return;
+
+    playBtn.dataset.leadinAttached = "true";
+
+    playBtn.addEventListener('click', (event) => {
+        // If clicking while counting down, cancel it
+        if (getIsCountingDown()) {
+            event.preventDefault();
+            event.stopImmediatePropagation();
+            cancelCountdown();
+            return;
+        }
+
+        const leadIn = getLeadInSeconds();
+        // Only trigger countdown if the synthesizer is not currently playing and countdown > 0
+        const isCurrentlyPlaying = playBtn.classList.contains('abcjs-pushed');
+        if (leadIn > 0 && !isCurrentlyPlaying) {
+            // Prevent immediate play
+            event.preventDefault();
+            event.stopImmediatePropagation();
+
+            startCountdown(() => {
+                if (state.synthControl) {
+                    state.synthControl.play();
+                }
+            });
+        }
+    }, true); // Use capture phase so we intercept before ABCJS internal listener
+
+    // Also cancel countdown if user clicks the reset button
+    const resetBtn = container.querySelector('.abcjs-midi-reset');
+    if (resetBtn) {
+        resetBtn.addEventListener('click', () => {
+            cancelCountdown();
+        });
+    }
 }
 

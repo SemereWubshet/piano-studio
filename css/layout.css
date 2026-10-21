@@ -37,12 +37,20 @@
     flex: 1; 
     overflow: auto; 
     padding: 40px; 
+    box-sizing: border-box;
+}
+
+#paper-stage {
+    display: inline-flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-width: 100%;
+    box-sizing: border-box;
 }
 
 #paper { 
     display: inline-block; 
-    transform-origin: top left; 
-    transition: transform 0.2s ease; 
+    transform-origin: top center; 
 }
 
 /* Ensure ABCJS SVG fills cleanly */

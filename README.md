@@ -11,12 +11,9 @@ A lightweight, local piano practice studio that syncs directly with your local f
 ## ✨ Features
 
 - 🎼 **Live ABC Sheet Music Rendering:** Automatically renders multi-tune ABC files into clean, interactive musical scores.
-- 🎹 **Integrated Web Audio Playback:** Synth playback with real-time note highlighting, looping, tempo warp, and a custom audio scrubber.
-- 🔍 **Focus Mode (Split-Screen Friendly):** Hide the sidebar, top bars, and audio player with a single click or keypress to maximize sheet visibility when practicing alongside video tutorials.
-- 🔎 **Fluid Zooming:** Smoothly scale sheet music using keyboard shortcuts, toolbar buttons, or <kbd>Ctrl</kbd> + Mouse Wheel.
+- 🔊 **Integrated Web Audio Playback:** Synth playback with real-time note highlighting, looping, lead-in countdown, and tempo warp.
+- 🎹 **Interactive Light-Up Piano:** A bottom piano tray (C2-C7) with acoustic sound synthesis.
 - ✏️ **In-Browser ABC Editor:** Slide out a side drawer to edit ABC code on the fly and save changes straight back to disk with automatic file reloads.
-- 📐 **Draggable Layout:** Drag sidebar and editor borders to customize your screen layout to your preference.
-- 🎨 **Modular CSS Themes:** Centralized color and sizing variables in `css/variables.css` (featuring a velvety midnight navy and warm gold theme).
 - 🛑 **Smart Auto-Shutdown:** Tab-close watchdog automatically terminates the background server and frees port 8000 when you are done practicing.
 
 ---
@@ -25,6 +22,9 @@ A lightweight, local piano practice studio that syncs directly with your local f
 
 | Shortcut | Action |
 |---|---|
+| <kbd>P</kbd> | Play / Pause Audio Playback |
+| <kbd>R</kbd> | Toggle Repeat / Loop Playback |
+| <kbd>K</kbd> | Toggle Light-Up Piano Tray |
 | <kbd>F</kbd> | Toggle Focus Mode (maximize sheet music) |
 | <kbd>Esc</kbd> | Exit Focus Mode |
 | <kbd>+</kbd> or <kbd>=</kbd> | Zoom In |
@@ -48,14 +48,18 @@ piano-studio/
 │   ├── sidebar.css        # Tree navigation, folders, and tunes list
 │   ├── audio-bar.css      # Custom player bar styling, buttons, seeker track
 │   ├── editor.css         # ABC raw code drawer and save controls
-│   └── focus-mode.css     # Focus mode layout overrides & floating glass controls
+│   ├── focus-mode.css     # Focus mode layout overrides & floating glass controls
+│   └── piano-keyboard.css # Bottom light-up piano dock, keys, and drag handle
 ├── js/
 │   ├── state.js           # Central state store (active file, zoom, tunes)
 │   ├── api.js             # HTTP communication (scores, save, heartbeat, shutdown)
 │   ├── music-engine.js    # ABCJS score rendering & synth audio controller
+│   ├── countdown.js       # Lead-in timer controller, audio metronome ticks
+│   ├── piano-keyboard.js  # 61-key piano DOM, note lighting, and tray resizing
+│   ├── piano-synth.js     # Acoustic piano Web Audio multi-string synthesis
 │   ├── sidebar.js         # Tree accordion rendering & sidebar drag resizing
 │   ├── editor.js          # Code drawer toggling, resizing, and save logic
-│   ├── focus-controls.js  # Focus mode toggles, zoom math, and shortcuts
+│   ├── focus-controls.js  # Focus mode toggles, 60fps smooth zoom math, centering
 │   └── app.js             # Main entry point and orchestrator
 ├── scores/
 │   └── sample.abc         # Starter repertoire file
@@ -121,7 +125,7 @@ To suppress the browser security confirmation popup:
 
 #### 3. Restart Browser & Bookmark `launcher.html`
 * Restart your browser (`brave://restart` or `chrome://restart`) to load policies.
-* Bookmark `launcher.html` using its absolute path (e.g. `file:///home/user/piano-studio/launcher.html`).
+* Bookmark `launcher.html` using its absolute Linux file path (e.g. `file:///home/semere/Desktop/sources/piano-studio/launcher.html`).
 * Clicking the bookmark triggers the `piano://start` protocol in an invisible frame, instantly wakes `launcher.py`, and seamlessly redirects you to `http://localhost:8000` the millisecond Python is ready.
 
 ---

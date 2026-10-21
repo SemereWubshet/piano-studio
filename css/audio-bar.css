@@ -106,3 +106,95 @@
     fill: var(--player-btn-active-icon) !important;
 }
 
+/* --- Lead-in Countdown Control --- */
+.lead-in-control {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--bg-card, #ffffff);
+    border: 1px solid var(--border, #e2e8f0);
+    border-radius: 8px;
+    padding: 4px 10px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--text-secondary, #64748b);
+    user-select: none;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.lead-in-control.is-counting {
+    border-color: #fbbf24;
+    box-shadow: 0 0 10px rgba(251, 191, 36, 0.35);
+}
+
+.lead-in-label {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.lead-in-control input[type="number"] {
+    width: 44px;
+    padding: 3px 6px;
+    border: 1px solid var(--border, #cbd5e1);
+    border-radius: 6px;
+    background: var(--bg-app, #f8fafc);
+    color: var(--text-primary, #0f172a);
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-align: center;
+    outline: none;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.lead-in-control input[type="number"]:focus {
+    border-color: var(--accent, #1d4ed8);
+    box-shadow: 0 0 0 2px rgba(29, 78, 216, 0.15);
+}
+
+.lead-in-unit {
+    font-size: 0.8rem;
+    color: var(--text-muted, #94a3b8);
+}
+
+/* Inline Countdown Badge replacing/overlaying right in the control */
+.lead-in-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 28px;
+    height: 26px;
+    padding: 0 6px;
+    border-radius: 6px;
+    background: #0f172a;
+    color: #fbbf24;
+    font-weight: 700;
+    font-size: 0.95rem;
+    cursor: pointer;
+    border: 1px solid rgba(251, 191, 36, 0.5);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    animation: leadInTick 0.85s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.lead-in-badge.hidden {
+    display: none !important;
+}
+
+@keyframes leadInTick {
+    0% {
+        transform: scale(1.3);
+        background: #1e293b;
+        color: #ffffff;
+    }
+    50% {
+        transform: scale(1.05);
+        color: #fbbf24;
+    }
+    100% {
+        transform: scale(1.0);
+    }
+}
+
+
