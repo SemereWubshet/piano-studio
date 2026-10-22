@@ -18,7 +18,9 @@ function handleControlChange(cc, value) {
         const sustainBtn = document.getElementById('btn-toggle-sustain');
         if (sustainBtn) {
             sustainBtn.classList.toggle('active', isPedalPressed);
-            sustainBtn.innerHTML = `<span class="sustain-pedal-icon">🦶</span> <span>Sustain: ${isPedalPressed ? 'ON' : 'OFF'}</span>`;
+            const titleText = isPedalPressed ? 'Sustain on' : 'Sustain off';
+            sustainBtn.title = titleText;
+            sustainBtn.setAttribute('aria-label', titleText + '. Click to toggle sustain');
         }
     }
 }

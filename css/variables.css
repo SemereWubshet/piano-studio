@@ -1,39 +1,98 @@
-/* --- Variables & Reset --- */
+/* ==========================================================================
+   PIANO STUDIO - DESIGN TOKENS & COLOR THEME
+   
+   HOW TO CUSTOMIZE:
+   Simply adjust the values below to tweak colors and typography:
+   - --bg-app: Main application & stage background (warm paper tone)
+   - --bg-stage-card: Paper card containing the sheet music
+   - --color-primary: Deep classic navy (used for primary actions & active editor)
+   - --color-amber: Warm amber-gold (used for play button, lit keys, note highlight)
+   - --border-color: Clean dividers and card outlines
+   ========================================================================== */
+
 :root {
-    /* --- Theme Core (Velvety Navy & Slate) --- */
-    --bg-app: #f8fafc;                       /* Crisp light background */
-    --bg-sidebar: #f1f5f9;                   /* Clean slate sidebar */
-    --bg-card: #ffffff;                      /* Crisp white card / sheet stage */
-    --border: #e2e8f0;                       /* Subtle clean divider */
-    --border-focus: #2563eb;                 /* Vibrant navy/royal focus */
-    --text-main: #0f172a;                    /* Deep obsidian slate text */
-    --text-muted: #475569;                   /* Clear readable slate text */
-    --accent: #1d4ed8;                       /* Vibrant rich royal navy */
-    --accent-light: #eff6ff;                 /* Fresh ice-blue highlight tint */
+    /* --- Typography --- */
+    --font-sans: 'Figtree', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    --font-fancy: 'Cormorant Garamond', Garamond, 'Times New Roman', serif;
+    --font-serif: 'Fraunces', Georgia, Cambria, "Times New Roman", serif;
+    --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
 
-    /* --- Audio Player Theme (Velvety Midnight Navy + Luminous Amber Gold) --- */
-    /* 1. Bar Container & Pill */
-    --player-bg: rgb(26, 26, 83);                    /* Velvety midnight navy pill */
-    --player-border: #334155;                /* Distinct slate border */
-    --player-shadow: 0 4px 16px rgba(15, 23, 42, 0.25); /* Deep rich shadow */
+    /* --- Core Surface & Canvas Colors --- */
+    --bg-app: #f4f1ea;                       /* Warm paper tone background */
+    --bg-sidebar: #fbfaf6;                   /* Soft off-white sidebar background */
+    --bg-stage-card: #fffdf8;                /* Warm ivory sheet music card */
+    --bg-card: #ffffff;                      /* Crisp white for dialogs and floating pills */
+    --bg-input: #f4f1ea;                     /* Pill & input background */
+    --bg-hover: #ede9e0;                     /* Soft hover surface */
 
-    /* 2. Control Buttons (Play, Restart, Loop) */
-    --player-btn-color: #cbd5e1;             /* Crisp platinum-silver icons */
-    --player-btn-hover-color: #ffffff;       /* Pure glowing white on hover */
-    --player-btn-hover-bg: rgba(255, 255, 255, 0.15); /* Frosted glass hover */
-    --player-btn-active-bg: #f59e0b;         /* Vibrant amber-gold active state */
-    --player-btn-active-icon: #0f172a;       /* Contrasting dark icon for active buttons */
+    /* --- Borders & Dividers --- */
+    --border-color: #e4dfd3;                 /* Warm subtle divider */
+    --border-subtle: #eeebe3;                /* Ultra-light border */
+    --border-focus: #114882;                 /* Primary focus ring */
 
-    /* 3. Seeker Track (The groove) */
-    --seeker-track-bg: #1e293b;              /* Clean dark groove */
-    --seeker-track-height: 15px;              /* Groove thickness */
+    /* --- Typography Colors --- */
+    --text-primary: #1d1b17;                 /* Deep warm obsidian text */
+    --text-muted: #6b665a;                   /* Warm stone gray secondary text */
+    --text-subtle: #8a8578;                  /* Gentle notation lines & hints */
 
-    /* 4. Seeker Fill / Progress (Vibrant Luminous Amber Gold) */
-    --seeker-fill-color: #fbbf24;            /* Vibrant warm amber-gold progress bar */
-    --seeker-fill-hover: #fcd34d;            /* Radiant bright gold on hover */
-    --seeker-fill-active: #f59e0b;           /* Rich honey gold while scrubbing */
+    /* --- Brand & Primary Accent (Deep Classic Navy) --- */
+    --color-primary: #114882;                /* Classic rich navy blue */
+    --color-primary-hover: #0c3663;          /* Darker navy on hover */
+    --color-primary-text: #ffffff;           /* Crisp white on primary buttons */
+
+    /* --- Highlight Accent (Warm Amber Gold) --- */
+    --color-amber: #f2b84b;                  /* Radiant amber-gold (Play button, key lights) */
+    --color-amber-hover: #e5a735;            /* Hover amber */
+    --color-amber-dark: #b36b00;             /* Rich amber text & note selection */
+    --color-amber-text: #8a5a00;             /* High-contrast amber text */
+    --color-amber-bg: #fbf0d6;               /* Amber tint for active toggle buttons */
+    --color-amber-border: #f2b84b;           /* Amber border */
+
+    /* --- Status / Feedback Colors --- */
+    --color-success-bg: #dff3ee;             /* Mint status pill bg (MIDI connected) */
+    --color-success-text: #0f6b5e;           /* Deep mint text */
+    --color-success-dot: #1f9d8b;            /* Radiant mint indicator dot */
+    
+    --color-record-bg: #fdf1ee;              /* Soft rose bg (Record MIDI) */
+    --color-record-text: #a12d1c;            /* Deep scarlet text */
+    --color-record-border: #e9b8b0;          /* Rose border */
+    --color-record-dot: #d6402b;             /* Radiant record dot */
+
+    --color-warning-bg: #fef3c7;             /* Warning pill */
+    --color-warning-text: #92400e;
+
+    /* --- Audio Player Theme --- */
+    --player-bg: #ffffff;                    /* Pure white floating audio bar */
+    --player-border: #e4dfd3;                /* Subtle audio bar border */
+    --player-shadow: 0 10px 28px rgba(59, 47, 26, 0.12); /* Warm atmospheric shadow */
+    --player-btn-color: #6b665a;             /* Subtle control icons */
+    --player-btn-hover-color: #1d1b17;       /* Dark icon on hover */
+    --player-btn-hover-bg: #f4f1ea;          /* Gentle pill hover */
+
+    /* Seeker Track & Progress Fill */
+    --seeker-track-bg: #e4dfd3;              /* Clean groove */
+    --seeker-track-height: 6px;              /* Modern thin groove */
+    --seeker-fill-color: #f2b84b;            /* Warm amber gold fill */
+    --seeker-fill-hover: #f59e0b;
+    --seeker-thumb-color: #114882;           /* Navy scrubber head */
+
+    /* --- Piano Dock & Keyboard Tokens --- */
+    --piano-dock-bg: #e9e4d6;                /* Warm stone/wood piano dock tray */
+    --piano-dock-border: #d6d0c0;            /* Soft dock border */
+    --piano-white-key-bg: #ffffff;           /* Clean white keys */
+    --piano-white-key-border: #d6d0c0;       /* Key outline */
+    --piano-black-key-bg: #23242a;           /* Deep matte charcoal black keys */
+    --piano-key-active-amber: #f2b84b;       /* Active key amber glow */
+    --piano-key-active-shadow: rgba(242, 184, 75, 0.55);
+    --piano-key-midi-glow: #38bdf8;          /* Physical MIDI strike sky glow */
+
+    /* Legacy compatibility aliases */
+    --accent: var(--color-primary);
+    --accent-light: var(--color-amber-bg);
+    --border: var(--border-color);
 }
 
+/* Base resets */
 * { 
     margin: 0; 
     padding: 0; 
@@ -41,42 +100,57 @@
 }
 
 body { 
-    font-family: system-ui, sans-serif; 
+    font-family: var(--font-sans); 
     background: var(--bg-app); 
-    color: var(--text-main); 
+    color: var(--text-primary); 
     height: 100vh; 
     overflow: hidden; 
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
-/* Common button primitives */
+/* Button primitives */
 .btn { 
-    padding: 6px 12px; 
-    border: 1px solid var(--border); 
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 7px 14px; 
+    border: 1px solid var(--border-color); 
     background: var(--bg-card); 
-    border-radius: 6px; 
+    color: var(--text-primary);
+    border-radius: 10px; 
     cursor: pointer; 
+    font-family: var(--font-sans);
     font-weight: 600; 
-    font-size: 0.85rem; 
+    font-size: 13px; 
     transition: all 0.15s ease;
+    user-select: none;
 }
 
 .btn:hover { 
-    background: var(--bg-sidebar); 
+    background: var(--bg-hover); 
+}
+
+.btn:active {
+    transform: scale(0.98);
 }
 
 .btn-primary { 
-    background: var(--accent); 
-    color: white; 
-    border-color: var(--accent); 
+    background: var(--color-primary); 
+    color: var(--color-primary-text); 
+    border-color: var(--color-primary); 
 }
 
 .btn-primary:hover { 
-    background: #1d4ed8; 
+    background: var(--color-primary-hover); 
+    border-color: var(--color-primary-hover);
 }
 
 .btn-ghost {
     background: transparent;
     border-color: transparent;
+    color: var(--text-muted);
 }
 
 .btn-ghost:hover {
@@ -85,8 +159,24 @@ body {
 }
 
 .btn-sm {
-    padding: 4px 8px;
-    font-size: 0.8rem;
+    padding: 4px 10px;
+    font-size: 12px;
+    border-radius: 8px;
+}
+
+/* Keyboard shortcut badge styling inside buttons */
+kbd.shortcut-tag {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-muted);
+    background: var(--bg-app);
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    padding: 0 5px;
+    line-height: 16px;
+    font-weight: normal;
+    display: inline-block;
+    margin-left: 3px;
 }
 
 .placeholder, .placeholder-text { 
@@ -94,3 +184,7 @@ body {
     font-style: italic; 
 }
 
+/* Global utility */
+.hidden {
+    display: none !important;
+}

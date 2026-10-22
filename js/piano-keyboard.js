@@ -197,6 +197,8 @@ export function togglePianoTray(forceState) {
         if (isTrayOpen) requestAnimationFrame(() => updateBlackKeyPositions());
     }
     if (toggleBtn) toggleBtn.classList.toggle('active', isTrayOpen);
+    const focusBtn = document.getElementById('btn-focus-keys');
+    if (focusBtn) focusBtn.classList.toggle('active', isTrayOpen);
 
     localStorage.setItem(STORAGE_OPEN_KEY, isTrayOpen ? 'true' : 'false');
 }

@@ -13,14 +13,30 @@ let zoomAnimationId = null;
 
 function applyZoom(zoom) {
     const paperEl = document.getElementById('paper');
+    const stageEl = document.getElementById('paper-stage');
+    const roundedZoom = Math.round(zoom * 1000) / 1000;
+
     if (paperEl) {
-        // Round to 3 decimal places so browser SVG renderer doesn't suffer subpixel raster blurring
-        const roundedZoom = Math.round(zoom * 1000) / 1000;
         paperEl.style.transform = `scale(${roundedZoom})`;
+
+        // Expand stage dimensions so scroll container detects overflow and provides horizontal & vertical scrolling
+        if (stageEl) {
+            const baseW = paperEl.offsetWidth || 820;
+            const baseH = paperEl.offsetHeight || 600;
+            const scaledW = baseW * roundedZoom;
+            const scaledH = baseH * roundedZoom;
+
+            stageEl.style.minWidth = `${scaledW + 60}px`;
+            stageEl.style.minHeight = `${scaledH + 60}px`;
+        }
     }
     const zoomIndicator = document.getElementById('focus-zoom-level');
     if (zoomIndicator) {
         zoomIndicator.textContent = `${Math.round(zoom * 100)}%`;
+    }
+    const sheetZoomIndicator = document.getElementById('zoom-level-text');
+    if (sheetZoomIndicator) {
+        sheetZoomIndicator.textContent = `${Math.round(zoom * 100)}%`;
     }
 }
 
@@ -36,8 +52,8 @@ function animateZoom() {
         return;
     }
 
-    // Smooth lerp (0.2 factor per frame)
-    currentZoom += diff * 0.2;
+    // Smooth lerp (0.12 factor per frame for buttery smooth glide)
+    currentZoom += diff * 0.12;
     applyZoom(currentZoom);
     zoomAnimationId = requestAnimationFrame(animateZoom);
 }
@@ -59,6 +75,26 @@ export function resetZoom() {
     queueSmoothZoom(1.0);
 }
 
+let focusControlsTimeout = null;
+
+export function resetFocusControlsFade() {
+    const focusControls = document.getElementById('focus-controls');
+    const audioBar = document.getElementById('audio-bar');
+
+    if (focusControls) focusControls.classList.remove('faded');
+    if (audioBar) audioBar.classList.remove('faded');
+    clearTimeout(focusControlsTimeout);
+
+    if (state.isFocusMode) {
+        focusControlsTimeout = setTimeout(() => {
+            if (state.isFocusMode) {
+                if (focusControls) focusControls.classList.add('faded');
+                if (audioBar) audioBar.classList.add('faded');
+            }
+        }, 2200);
+    }
+}
+
 export function toggleFocusMode(forceState) {
     if (typeof forceState === 'boolean') {
         state.isFocusMode = forceState;
@@ -66,6 +102,14 @@ export function toggleFocusMode(forceState) {
         state.isFocusMode = !state.isFocusMode;
     }
     document.body.classList.toggle('focus-mode', state.isFocusMode);
+
+    const focusControls = document.getElementById('focus-controls');
+    const audioBar = document.getElementById('audio-bar');
+    if (!state.isFocusMode) {
+        if (focusControls) focusControls.classList.remove('faded');
+        if (audioBar) audioBar.classList.remove('faded');
+    }
+    resetFocusControlsFade();
 }
 
 /**
@@ -88,13 +132,13 @@ export function centerSheetMusic() {
 }
 
 export function initFocusAndZoomControls() {
-    // Zoom in / out buttons (smooth steps)
-    document.getElementById('btn-zoom-in')?.addEventListener('click', () => updateZoom(0.15));
-    document.getElementById('btn-zoom-out')?.addEventListener('click', () => updateZoom(-0.15));
-    document.getElementById('btn-focus-zoom-in')?.addEventListener('click', () => updateZoom(0.15));
-    document.getElementById('btn-focus-zoom-out')?.addEventListener('click', () => updateZoom(-0.15));
+    // Zoom in / out buttons (buttery smooth steps)
+    document.getElementById('btn-zoom-in')?.addEventListener('click', () => updateZoom(0.10));
+    document.getElementById('btn-zoom-out')?.addEventListener('click', () => updateZoom(-0.10));
+    document.getElementById('btn-focus-zoom-in')?.addEventListener('click', () => updateZoom(0.10));
+    document.getElementById('btn-focus-zoom-out')?.addEventListener('click', () => updateZoom(-0.10));
 
-    // Focus toggles
+    // Focus toggles & toolbar buttons
     document.getElementById('btn-toggle-focus')?.addEventListener('click', () => {
         toggleFocusMode();
         setTimeout(centerSheetMusic, 300);
@@ -104,17 +148,22 @@ export function initFocusAndZoomControls() {
         setTimeout(centerSheetMusic, 300);
     });
 
-    // Ctrl + MouseWheel / Trackpad pinch zoom
+    // Fade out focus toolbar and floating audio bar on mouse idle (2.2s)
+    window.addEventListener('mousemove', resetFocusControlsFade);
+    window.addEventListener('mousedown', resetFocusControlsFade);
+    window.addEventListener('touchstart', resetFocusControlsFade, { passive: true });
+
+    // Ctrl + MouseWheel / Trackpad pinch zoom (smooth controlled scaling)
     document.getElementById('sheet-wrapper')?.addEventListener('wheel', (e) => {
         if (e.ctrlKey) {
             e.preventDefault();
-            // Scale proportional to scroll intensity with smooth decay
-            const delta = -e.deltaY * 0.002;
+            // Scale proportional to scroll intensity with smooth decay and clamp
+            const delta = Math.max(-0.06, Math.min(0.06, -e.deltaY * 0.0008));
             queueSmoothZoom(targetZoom + delta);
         }
     }, { passive: false });
 
-    // Keyboard shortcuts: F (focus), Esc (exit focus), P (play/pause), R (repeat/loop), +/= (zoom in), - (zoom out), 0 (reset)
+    // Keyboard shortcuts: F (focus), Esc (exit focus), P (play/pause), R (repeat/loop), E (editor), +/= (zoom in), - (zoom out), 0 (reset)
     window.addEventListener('keydown', (e) => {
         if (e.target && (e.target.tagName === 'TEXTAREA' || e.target.tagName === 'INPUT')) return;
 
@@ -122,6 +171,19 @@ export function initFocusAndZoomControls() {
             toggleFocusMode();
         } else if (e.key === 'Escape' && state.isFocusMode) {
             toggleFocusMode(false);
+        } else if (e.key === 'e' || e.key === 'E') {
+            e.preventDefault();
+            document.getElementById('btn-toggle-editor')?.click();
+        } else if ((e.key === 's' || e.key === 'S') && !e.ctrlKey && !e.metaKey) {
+            e.preventDefault();
+            const sidebar = document.getElementById('sidebar');
+            const toggleSidebarBtn = document.getElementById('btn-toggle-sidebar');
+            const expandSidebarBtn = document.getElementById('btn-expand-sidebar');
+            if (sidebar?.classList.contains('collapsed')) {
+                expandSidebarBtn?.click();
+            } else {
+                toggleSidebarBtn?.click();
+            }
         } else if (e.key === 'p' || e.key === 'P') {
             e.preventDefault();
             const playBtn = document.querySelector('.abcjs-midi-start');
@@ -131,9 +193,9 @@ export function initFocusAndZoomControls() {
             const loopBtn = document.querySelector('.abcjs-midi-loop');
             if (loopBtn) loopBtn.click();
         } else if (e.key === '+' || e.key === '=') {
-            updateZoom(0.12);
+            updateZoom(0.10);
         } else if (e.key === '-' || e.key === '_') {
-            updateZoom(-0.12);
+            updateZoom(-0.10);
         } else if (e.key === '0') {
             resetZoom();
         }

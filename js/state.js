@@ -16,6 +16,7 @@ export const state = {
     currentVisualObj: null, // Active ABCJS visualObj for timing/wait-mode
     isWaitMode: false,      // Interactive Wait-For-Me practice mode
     isRecordingMidi: false, // Live MIDI-to-ABC editor recording
+    isSeeking: false,       // Suppresses rapid intermediate key strikes during scrubber jumps
     lastFolderSyncTime: "0",
     isShuttingDown: false,
 };

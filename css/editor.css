@@ -1,19 +1,21 @@
-/* --- Collapsible ABC Editor Drawer --- */
+/* --- Collapsible ABC Editor Drawer & Top Bar Controls --- */
 .editor-drawer {
-    --drawer-w: 420px;
+    --drawer-w: 360px;
     width: var(--drawer-w);
     min-width: 280px;
-    max-width: 75vw;
-    overflow: auto;
+    max-width: 600px;
     position: relative;
-    direction: ltr;
-    background: #fafafa;
-    border-left: 4px solid var(--border);
+    background: var(--bg-sidebar);
+    border-left: 1px solid var(--border-color);
     display: flex;
     flex-direction: column;
     flex-shrink: 0;
     transition: margin-right 0.25s cubic-bezier(0.16, 1, 0.3, 1);
     margin-right: 0;
+    padding: 14px;
+    box-sizing: border-box;
+    gap: 10px;
+    z-index: 20;
 }
 
 .editor-drawer.hidden,
@@ -21,115 +23,333 @@
     margin-right: calc(-1 * var(--drawer-w));
 }
 
-#editor-drawer:hover {
-    border-left-color: var(--accent, #3b82f6);
-}
-
 .drawer-header { 
-    padding: 15px; 
-    border-bottom: 1px solid var(--border); 
     display: flex; 
     justify-content: space-between; 
     align-items: center; 
-    font-weight: 600; 
+}
+
+.drawer-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.btn-drawer-close {
+    all: unset;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+    color: var(--text-muted);
+    font-size: 18px;
+    transition: all 0.15s ease;
+}
+
+.btn-drawer-close:hover {
+    background: var(--bg-hover);
+    color: var(--text-primary);
 }
 
 .drawer-actions {
     display: flex;
     align-items: center;
+    justify-content: space-between;
     gap: 8px;
 }
 
+/* Record MIDI Button */
 .btn-record {
-    background: #ffffff;
-    border: 1px solid #fca5a5;
-    color: #dc2626;
-    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 34px;
+    padding: 0 14px;
+    border-radius: 10px;
+    border: 1px solid var(--color-record-border);
+    background: var(--color-record-bg);
+    color: var(--color-record-text);
+    font-size: 13px;
+    font-weight: 700;
+    gap: 8px;
+    cursor: pointer;
+    transition: all 0.15s ease;
 }
 
 .btn-record:hover {
-    background: #fef2f2;
+    filter: brightness(0.97);
+}
+
+.record-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--color-record-dot);
+    display: inline-block;
 }
 
 .btn-record.recording {
-    background: #dc2626 !important;
-    border-color: #b91c1c !important;
+    background: var(--color-record-dot) !important;
+    border-color: #991b1b !important;
     color: #ffffff !important;
     animation: recPulse 1.2s infinite ease-in-out;
 }
 
-@keyframes recPulse {
-    0%, 100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.45); }
-    50% { box-shadow: 0 0 0 6px rgba(220, 38, 38, 0); }
+.btn-record.recording .record-dot {
+    background: #ffffff;
 }
 
-/* --- Top Bar USB MIDI Status Pill & Toast --- */
-.voice-picker-container {
+@keyframes recPulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(214, 64, 43, 0.45); }
+    50% { box-shadow: 0 0 0 6px rgba(214, 64, 43, 0); }
+}
+
+/* Save / Apply Button */
+.btn-save-score {
     display: inline-flex;
     align-items: center;
-}
-
-.select-piano-voice {
-    background: #ffffff;
-    border: 1px solid var(--border, #cbd5e1);
-    border-radius: 20px;
-    padding: 4px 10px;
-    font-size: 0.8rem;
-    font-weight: 600;
-    color: #0f172a;
-    outline: none;
+    justify-content: center;
+    height: 34px;
+    padding: 0 16px;
+    border-radius: 10px;
+    background: var(--color-primary);
+    color: #ffffff;
+    font-size: 13px;
+    font-weight: 700;
+    border: none;
     cursor: pointer;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
-    transition: border-color 0.15s ease;
-}
-
-.select-piano-voice:hover,
-.select-piano-voice:focus {
-    border-color: var(--accent, #1d4ed8);
-}
-
-.btn-sustain {
-    background: #ffffff;
-    border: 1px solid var(--border, #cbd5e1);
-    color: var(--text-secondary, #475569);
-    border-radius: 20px;
-    padding: 4px 10px;
-    font-size: 0.78rem;
-    font-weight: 600;
-    cursor: pointer;
-    user-select: none;
     transition: all 0.15s ease;
 }
 
-.btn-sustain:hover {
-    background: #f1f5f9;
+.btn-save-score:hover {
+    background: var(--color-primary-hover);
 }
 
-.btn-sustain.active {
-    background: #0f172a !important;
-    color: #fbbf24 !important;
-    border-color: rgba(251, 191, 36, 0.5) !important;
-    box-shadow: 0 0 10px rgba(251, 191, 36, 0.25);
+/* Textarea - Wraps cleanly with NO horizontal scrollbar */
+#abc-source { 
+    flex: 1; 
+    padding: 12px; 
+    border: 1px solid var(--border-color); 
+    border-radius: 12px; 
+    outline: none; 
+    resize: none; 
+    font-family: var(--font-mono); 
+    font-size: 12.5px; 
+    line-height: 1.6; 
+    background: var(--bg-stage-card); 
+    color: var(--text-primary); 
+    white-space: pre-wrap !important;
+    word-break: break-word !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    box-sizing: border-box;
 }
+
+#abc-source:focus {
+    border-color: var(--border-focus);
+}
+
+.drawer-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 12px;
+    color: var(--text-muted);
+    padding: 0 2px;
+}
+
+.editor-status-valid {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--color-success-text);
+    font-weight: 600;
+}
+
+.status-valid-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--color-success-dot);
+}
+
+/* --- Top Bar Unified Voice & Sustain Pill (No Foot Emoji) --- */
+.sound-sustain-pill {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    height: 36px;
+    padding: 0 8px 0 6px;
+    border-radius: 10px;
+    border: 1px solid var(--border-color);
+    background: #ffffff;
+    font-size: 13px;
+    gap: 4px;
+    color: var(--text-primary);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+/* Enlarged Quarter Note Button for Sustain */
+.btn-sustain-icon {
+    all: unset;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 6px;
+    font-size: 18px;
+    line-height: 1;
+    color: var(--text-primary); /* Black / obsidian = sustain off */
+    transition: color 0.15s ease, background-color 0.15s ease, transform 0.1s ease;
+    user-select: none;
+}
+
+.btn-sustain-icon:hover {
+    background: rgba(0, 0, 0, 0.04);
+}
+
+.btn-sustain-icon.active {
+    color: var(--color-amber-dark, #b36b00) !important; /* Amber = sustain on */
+    background: var(--color-amber-bg, #fbf0d6);
+    filter: drop-shadow(0 0 4px rgba(242, 184, 75, 0.45));
+}
+
+.btn-sustain-icon:active {
+    transform: scale(0.92);
+}
+
+/* Custom Piano Voice Trigger Button */
+.btn-voice-trigger {
+    all: unset;
+    cursor: pointer;
+    font-family: var(--font-sans);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-primary);
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 2px 4px;
+    border-radius: 6px;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.btn-voice-trigger:hover {
+    color: var(--text-primary);
+    background: rgba(0, 0, 0, 0.04);
+}
+
+.voice-caret {
+    opacity: 0.6;
+    transition: transform 0.2s ease;
+}
+
+.btn-voice-trigger[aria-expanded="true"] .voice-caret {
+    transform: rotate(180deg);
+}
+
+/* Redesigned Custom Voice Pop-up (Rounded, Soft Shadow, Warm Amber Highlight) */
+.voice-dropdown-menu {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    min-width: 185px;
+    background: #ffffff;
+    border: 1px solid var(--border-color, #e4dfd3);
+    border-radius: 12px;
+    box-shadow: 0 10px 28px rgba(59, 47, 26, 0.12), 0 2px 6px rgba(0, 0, 0, 0.04);
+    padding: 6px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    z-index: 1000;
+    animation: voiceMenuSlideIn 0.16s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.voice-dropdown-menu.hidden {
+    display: none;
+}
+
+@keyframes voiceMenuSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-4px) scale(0.98);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.voice-option {
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-family: var(--font-sans);
+    font-weight: 500;
+    color: var(--text-primary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.voice-option:hover {
+    background: var(--color-amber-bg, #fef7ec);
+    color: var(--color-amber-dark, #b47509);
+}
+
+.voice-option.active {
+    background: var(--color-amber-bg, #fef7ec);
+    color: var(--color-amber-dark, #b47509);
+    font-weight: 600;
+}
+
+.sound-sustain-pill .select-piano-voice {
+    border: none;
+    background: transparent;
+    font-family: var(--font-sans);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-primary);
+    outline: none;
+    cursor: pointer;
+    padding: 0;
+}
+
+
 
 .midi-status-pill {
     display: inline-flex;
     align-items: center;
-    gap: 7px;
-    padding: 4px 10px;
-    border-radius: 20px;
-    background: #f1f5f9;
-    border: 1px solid var(--border, #cbd5e1);
-    font-size: 0.78rem;
-    font-weight: 600;
-    color: #334155;
-    cursor: pointer;
+    gap: 8px;
+    height: 36px;
+    padding: 0 12px;
+    border-radius: 999px;
+    background: #dff3ee;
+    border: 1px solid rgba(31, 157, 139, 0.25);
+    font-size: 13px;
+    font-weight: 700;
+    color: #0f6b5e;
+    cursor: default;
     user-select: none;
-    transition: border-color 0.15s ease, background-color 0.15s ease;
+    transition: all 0.15s ease;
 }
 
-.midi-status-pill:hover {
-    background: #e2e8f0;
+.midi-status-pill.hidden {
+    display: none !important;
+}
+
+.midi-status-pill.disconnected {
+    background: var(--bg-app);
+    color: var(--text-muted);
+    border-color: var(--border-color);
 }
 
 .midi-dot {
@@ -137,11 +357,13 @@
     height: 8px;
     border-radius: 50%;
     display: inline-block;
+    background: #1f9d8b;
+    flex-shrink: 0;
 }
 
 .midi-dot.connected {
-    background: #10b981;
-    box-shadow: 0 0 8px rgba(16, 185, 129, 0.7);
+    background: #1f9d8b;
+    box-shadow: 0 0 6px rgba(31, 157, 139, 0.6);
 }
 
 .midi-dot.waiting {
@@ -153,50 +375,55 @@
 }
 
 .midi-sound-btn {
-    background: transparent;
-    border: none;
+    all: unset;
     cursor: pointer;
-    font-size: 0.85rem;
-    padding: 0 2px;
-    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    color: #0f6b5e;
+    margin-left: 2px;
+    opacity: 0.85;
+    transition: opacity 0.15s, background-color 0.15s;
+}
+
+.midi-sound-btn:hover {
+    opacity: 1;
+    background: rgba(15, 107, 94, 0.12);
 }
 
 .midi-sound-btn.muted {
     opacity: 0.55;
+    color: #a12d1c;
 }
 
-/* Studio Floating Toast */
+/* Studio Floating Toast (Warm Card matching reference) */
 .studio-toast {
     position: fixed;
-    top: 64px;
+    top: 70px;
     left: 50%;
     transform: translateX(-50%);
-    background: rgba(15, 23, 42, 0.94);
-    color: #fbbf24;
-    border: 1px solid rgba(251, 191, 36, 0.4);
-    border-radius: 20px;
+    background: #ffffff;
+    color: #1d1b17;
+    border: 1px solid #e4dfd3;
+    border-radius: 12px;
     padding: 8px 18px;
-    font-size: 0.85rem;
+    font-family: var(--font-sans);
+    font-size: 13px;
     font-weight: 600;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+    box-shadow: 0 10px 30px rgba(59, 47, 26, 0.14);
     z-index: 10000;
     pointer-events: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
     transition: opacity 0.2s ease, transform 0.2s ease;
 }
 
 .studio-toast.hidden {
+    display: none !important;
     opacity: 0;
     transform: translate(-50%, -8px);
 }
-
-#abc-source { 
-    flex: 1; 
-    padding: 15px; 
-    border: none; 
-    outline: none; 
-    resize: none; 
-    font-family: monospace; 
-    font-size: 0.9rem; 
-    background: transparent; 
-}
-

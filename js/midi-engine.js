@@ -92,41 +92,59 @@ function handleMidiMessage(event) {
     }
 }
 
+const SPEAKER_ON_SVG = `<svg width="15" height="15" viewBox="0 0 20 20" aria-hidden="true"><path d="M3 7.5h3l4-3.5v12l-4-3.5H3z" fill="currentColor"/><path d="M13 7a4 4 0 0 1 0 6M15.2 4.8a7 7 0 0 1 0 10.4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>`;
+const SPEAKER_OFF_SVG = `<svg width="15" height="15" viewBox="0 0 20 20" aria-hidden="true"><path d="M3 7.5h3l4-3.5v12l-4-3.5H3z" fill="currentColor"/><path d="M13.5 7.5l5 5M18.5 7.5l-5 5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>`;
+
+/** Real hardware inputs only (ignores the virtual "Midi Through" port). */
+function getRealMidiInputs() {
+    if (!midiAccess) return [];
+    return Array.from(midiAccess.inputs.values()).filter(
+        i => i && i.state === 'connected' && i.name && !/through|virtual|loop|virmidi/i.test(i.name)
+    );
+}
+
 function updateMidiStatusUI() {
+    const pillEl = document.getElementById('midi-status-pill');
     const badgeEl = document.getElementById('midi-device-status');
     const dotEl = document.getElementById('midi-status-dot');
     const soundBtn = document.getElementById('btn-midi-sound');
 
     if (soundBtn) {
-        soundBtn.textContent = muteMidiSynth ? '🔇' : '🔊';
+        soundBtn.innerHTML = muteMidiSynth ? SPEAKER_OFF_SVG : SPEAKER_ON_SVG;
         soundBtn.title = muteMidiSynth
-            ? 'MIDI Synth Muted (Using hardware piano speakers). Click to unmute.'
-            : 'MIDI Synth Active (Web Audio plays when pressing USB keys). Click to mute.';
+            ? 'Browser sound for your keyboard is muted. Click to unmute.'
+            : 'Browser plays sound when you press keys on your keyboard. Click to mute.';
+        soundBtn.setAttribute('aria-pressed', muteMidiSynth ? 'true' : 'false');
         soundBtn.classList.toggle('muted', muteMidiSynth);
     }
 
-    if (!badgeEl || !dotEl) return;
-
-    if (!midiAccess) {
-        badgeEl.textContent = 'MIDI Unavailable';
-        dotEl.className = 'midi-dot disconnected';
-        return;
+    // The pill only exists visually while a real MIDI device is connected
+    const inputs = getRealMidiInputs();
+    if (pillEl) {
+        if (inputs.length === 0) {
+            pillEl.classList.add('hidden');
+            pillEl.style.display = 'none';
+        } else {
+            pillEl.classList.remove('hidden');
+            pillEl.style.display = 'inline-flex';
+            const primaryName = inputs[0].name || 'MIDI Keyboard';
+            const shortName = primaryName.length > 24 ? primaryName.slice(0, 22) + '…' : primaryName;
+            if (badgeEl) badgeEl.textContent = shortName;
+            pillEl.title = `Connected: ${primaryName}`;
+            if (dotEl) dotEl.className = 'midi-dot connected';
+        }
     }
 
-    const inputs = Array.from(midiAccess.inputs.values()).filter(
-        i => i.state === 'connected' && !/through/i.test(i.name)
-    );
-    // Fallback if only Midi Through is present
-    const allInputs = inputs.length > 0 ? inputs : Array.from(midiAccess.inputs.values());
-
-    if (allInputs.length > 0) {
-        const primaryName = allInputs[0].name || 'USB Keyboard';
-        const shortName = primaryName.length > 20 ? primaryName.slice(0, 18) + '…' : primaryName;
-        badgeEl.textContent = `MIDI: ${shortName}`;
-        dotEl.className = 'midi-dot connected';
-    } else {
-        badgeEl.textContent = 'No USB MIDI';
-        dotEl.className = 'midi-dot waiting';
+    // Wait Mode option only surfaces when a physical MIDI keyboard is connected
+    const waitModeBtn = document.getElementById('btn-wait-mode');
+    if (waitModeBtn) {
+        if (inputs.length === 0) {
+            waitModeBtn.classList.add('hidden');
+            waitModeBtn.style.display = 'none';
+        } else {
+            waitModeBtn.classList.remove('hidden');
+            waitModeBtn.style.display = 'inline-flex';
+        }
     }
 }
 
@@ -148,13 +166,8 @@ export async function initMidiEngine() {
             muteMidiSynth = !muteMidiSynth;
             localStorage.setItem(STORAGE_MUTE_KEY, muteMidiSynth ? 'true' : 'false');
             updateMidiStatusUI();
-            showStudioToast(muteMidiSynth ? '🔇 USB MIDI Web Synth Muted' : '🔊 USB MIDI Web Synth Enabled');
+            showStudioToast(muteMidiSynth ? 'Keyboard sound muted' : 'Keyboard sound on');
         });
-    }
-
-    const pillEl = document.getElementById('midi-status-pill');
-    if (pillEl) {
-        pillEl.addEventListener('click', () => requestWebMidi());
     }
 
     await requestWebMidi();
@@ -172,9 +185,9 @@ async function requestWebMidi() {
 
         midiAccess.onstatechange = (e) => {
             bindMidiInputs();
-            if (e.port && e.port.type === 'input') {
+            if (e.port && e.port.type === 'input' && !/through/i.test(e.port.name || '')) {
                 const stateLabel = e.port.state === 'connected' ? 'Connected' : 'Disconnected';
-                showStudioToast(`🎹 MIDI ${stateLabel}: ${e.port.name}`);
+                showStudioToast(`🎹 ${stateLabel}: ${e.port.name}`);
             }
         };
     } catch (err) {

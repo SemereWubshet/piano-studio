@@ -1,96 +1,111 @@
 /* --- Sidebar & Score Tree Styles --- */
 #sidebar {
-    --sidebar-w: 260px;
+    --sidebar-w: 240px;
     width: var(--sidebar-w);
     min-width: 180px;
-    max-width: 500px;
+    max-width: 450px;
     background: var(--bg-sidebar);
-    border-right: 4px solid var(--border);
+    border-right: 1px solid var(--border-color);
     display: flex;
     flex-direction: column;
     flex-shrink: 0;
     transition: margin-left 0.25s cubic-bezier(0.16, 1, 0.3, 1);
     margin-left: 0;
+    padding: 12px;
+    box-sizing: border-box;
+    position: relative;
+    z-index: 200;
 }
 
 #sidebar.collapsed {
     margin-left: calc(-1 * var(--sidebar-w));
 }
 
-#sidebar:hover {
-    border-right-color: var(--accent, #3b82f6);
+.sidebar-header { 
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 32px;
+    padding: 0 4px;
+    margin-bottom: 6px;
 }
 
-.sidebar-header { 
-    padding: 20px; 
-    border-bottom: 1px solid var(--border); 
-    color: var(--accent); 
+.sidebar-header h2 {
+    font-family: var(--font-serif);
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 6px;
 }
 
 .sidebar-section { 
-    padding: 15px 20px 5px; 
-    font-size: 0.75rem; 
-    font-weight: 700; 
-    color: var(--text-muted); 
+    display: flex;
+    align-items: center;
+    padding: 12px 6px 6px; 
+    font-size: 11px; 
+    letter-spacing: 0.08em; 
+    text-transform: uppercase; 
+    font-weight: 600; 
+    color: var(--text-muted, #6b665a); 
+    border-bottom: 1px solid var(--border-color, #e4dfd3);
+    margin-bottom: 8px;
 }
 
 .file-list { 
     list-style: none; 
-    padding: 10px; 
+    padding: 2px 0; 
     overflow-y: auto; 
     flex: 1; 
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
 }
 
 .score-item { 
-    margin-bottom: 5px; 
+    margin-bottom: 4px; 
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
 }
 
-/* Folder Header (e.g. Unit-1, Unit-2) */
+/* Score Item Header (Airy elegant Cormorant Garamond, crisp bold) */
 .score-header { 
     display: flex; 
     align-items: center; 
     cursor: pointer; 
-    padding: 8px 10px; 
-    border-radius: 6px; 
-    color: var(--text-muted); 
-    font-weight: 600; 
-    transition: 0.2s; 
-    font-size: 0.9rem; 
+    padding: 7px 12px; 
+    border-radius: 9px; 
+    color: var(--text-primary); 
+    font-family: var(--font-fancy);
+    font-weight: 700; 
+    font-size: 17.5px; 
+    letter-spacing: 0.01em;
+    text-transform: none;
+    transition: background 0.15s ease, color 0.15s ease; 
 }
 
 .score-header:hover { 
-    background: #e2e8f0; 
-    color: var(--text-main); 
+    background: var(--bg-hover); 
+    color: var(--text-primary); 
 }
 
 .score-header.active { 
     background: var(--bg-card); 
-    color: var(--accent); 
-    box-shadow: 0 1px 3px rgba(0,0,0,0.05); 
+    color: var(--text-primary); 
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04); 
 }
 
-/* Rotating Arrow Caret */
-.toggle-icon { 
-    width: 16px; 
-    height: 16px; 
-    margin-right: 8px; 
-    transition: transform 0.2s ease; 
-    fill: currentColor; 
-}
-
-.toggle-icon.open { 
-    transform: rotate(90deg); 
-}
-
-/* Indented Tunes List */
+/* Indented Tunes List (Airy elegant Cormorant Garamond, crisp bold) */
 .tune-list { 
     list-style: none; 
-    margin: 4px 0 8px 24px; 
+    margin: 4px 0 6px 14px; 
     padding-left: 12px; 
-    border-left: 1px solid var(--border); 
+    border-left: 1.5px solid var(--border-color, #e4dfd3); 
     display: none; 
     flex-direction: column; 
-    gap: 2px; 
+    gap: 3px; 
 }
 
 .tune-list.open { 
@@ -98,49 +113,140 @@
 }
 
 .tune-list li { 
-    font-size: 0.85rem; 
-    padding: 6px 10px; 
-    border-radius: 4px; 
+    font-family: var(--font-fancy);
+    font-size: 16.5px; 
+    padding: 6px 12px; 
+    border-radius: 8px; 
     cursor: pointer; 
     color: var(--text-muted); 
-    transition: 0.15s; 
+    font-weight: 600; 
+    letter-spacing: 0.01em;
+    text-transform: none;
+    transition: background 0.15s ease, color 0.15s ease; 
+    line-height: 1.35;
 }
 
 .tune-list li:hover { 
-    background: #e2e8f0; 
-    color: var(--text-main); 
+    background: var(--bg-hover); 
+    color: var(--text-primary); 
 }
 
 .tune-list li.active-tune { 
-    background: var(--accent-light); 
-    color: var(--accent); 
-    font-weight: 600; 
+    background: #ffffff; 
+    color: var(--text-primary); 
+    font-weight: 700; 
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05); 
 }
 
-/* Sidebar Toggle Button */
+/* Sidebar Toggle & Expand Buttons */
 .btn-sidebar-toggle {
     background: transparent;
-    border: 1px solid var(--border);
-    border-radius: 6px;
+    border: none;
+    border-radius: 8px;
     color: var(--text-muted);
     cursor: pointer;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 32px;
-    height: 32px;
+    width: 28px;
+    height: 28px;
     padding: 0;
     transition: all 0.15s ease;
     flex-shrink: 0;
 }
 
 .btn-sidebar-toggle:hover {
-    background: var(--bg-sidebar);
-    color: var(--text-main);
-    border-color: var(--border-focus);
+    background: var(--bg-hover);
+    color: var(--text-primary);
 }
 
 .btn-sidebar-toggle:active {
     transform: scale(0.95);
 }
 
+/* Shortcuts Button at bottom of sidebar */
+.btn-shortcuts {
+    all: unset;
+    cursor: pointer;
+    margin-top: auto;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    height: 38px;
+    padding: 0 8px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-muted);
+    transition: all 0.15s ease;
+}
+
+.btn-shortcuts:hover {
+    background: var(--bg-hover);
+    color: var(--text-primary);
+}
+
+.shortcuts-circle {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: 1px solid var(--border-color);
+    background: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 11px;
+    color: var(--text-muted);
+}
+
+/* Floating Shortcuts Dialog (Stays within sidebar, in front of stage & piano) */
+.shortcuts-dialog {
+    position: absolute;
+    bottom: 50px;
+    left: 12px;
+    width: calc(100% - 24px);
+    max-width: 250px;
+    padding: 14px;
+    border-radius: 14px;
+    background: #ffffff;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 14px 40px rgba(59, 47, 26, 0.20);
+    z-index: 500;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    transition: opacity 0.15s ease, transform 0.15s ease;
+    box-sizing: border-box;
+}
+
+.shortcuts-dialog.hidden {
+    display: none !important;
+}
+
+.shortcuts-dialog-title {
+    font-size: 13.5px;
+    font-weight: 700;
+    color: var(--text-primary);
+    padding-bottom: 4px;
+    border-bottom: 1px solid var(--border-subtle);
+}
+
+.shortcut-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 12.5px;
+    color: var(--text-primary);
+}
+
+.shortcut-row kbd {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-muted);
+    background: var(--bg-app);
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    padding: 0 5px;
+    line-height: 16px;
+}

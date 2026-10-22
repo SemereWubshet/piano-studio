@@ -10,18 +10,25 @@ import { parseTunes } from './music-engine.js';
 
 export function toggleEditor(forceState) {
     const drawer = document.getElementById('editor-drawer');
+    const btnToggle = document.getElementById('btn-toggle-editor');
     if (!drawer) return;
 
     if (drawer.offsetWidth > 0) {
         drawer.style.setProperty('--drawer-w', `${drawer.offsetWidth}px`);
     }
 
+    let isOpen;
     if (typeof forceState === "boolean") {
-        drawer.classList.toggle("open", forceState);
-        drawer.classList.toggle("hidden", !forceState);
+        isOpen = forceState;
+        drawer.classList.toggle("open", isOpen);
+        drawer.classList.toggle("hidden", !isOpen);
     } else {
-        drawer.classList.toggle("open");
-        drawer.classList.toggle("hidden");
+        isOpen = drawer.classList.toggle("open");
+        drawer.classList.toggle("hidden", !isOpen);
+    }
+
+    if (btnToggle) {
+        btnToggle.classList.toggle("active", isOpen);
     }
 }
 
@@ -71,14 +78,35 @@ export async function saveCurrentTune(onSavedCallback) {
 export function initEditorControls(onSavedCallback) {
     const drawer = document.getElementById('editor-drawer');
     const btnToggle = document.getElementById('btn-toggle-editor');
+    const btnClose = document.getElementById('btn-close-editor');
     const btnSave = document.getElementById('btn-save');
+    const abcSource = document.getElementById('abc-source');
+    const cursorPosEl = document.getElementById('editor-cursor-pos');
 
     if (btnToggle) {
         btnToggle.addEventListener('click', () => toggleEditor());
     }
 
+    if (btnClose) {
+        btnClose.addEventListener('click', () => toggleEditor(false));
+    }
+
     if (btnSave) {
         btnSave.addEventListener('click', () => saveCurrentTune(onSavedCallback));
+    }
+
+    if (abcSource && cursorPosEl) {
+        const updateCursor = () => {
+            const pos = abcSource.selectionStart || 0;
+            const textBefore = abcSource.value.substring(0, pos);
+            const lines = textBefore.split("\n");
+            const line = lines.length;
+            const col = lines[lines.length - 1].length + 1;
+            cursorPosEl.textContent = `Line ${line}, Col ${col}`;
+        };
+        abcSource.addEventListener('keyup', updateCursor);
+        abcSource.addEventListener('click', updateCursor);
+        abcSource.addEventListener('input', updateCursor);
     }
 
     if (drawer) {

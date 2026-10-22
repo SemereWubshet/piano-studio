@@ -75,15 +75,18 @@ function renderCurrentWaitStep() {
 
     const btnEl = document.getElementById('btn-wait-mode');
     const labelEl = document.getElementById('wait-mode-label');
+    const focusWaitBtn = document.getElementById('btn-focus-wait');
 
     if (!state.isWaitMode) {
         if (btnEl) btnEl.classList.remove('active');
-        if (labelEl) labelEl.textContent = 'Wait (W)';
+        if (focusWaitBtn) focusWaitBtn.classList.remove('active');
+        if (labelEl) labelEl.textContent = 'Wait';
         renderWaitModeKeyTargets([], new Set());
         return;
     }
 
     if (btnEl) btnEl.classList.add('active');
+    if (focusWaitBtn) focusWaitBtn.classList.add('active');
 
     if (waitSteps.length === 0) {
         if (labelEl) labelEl.textContent = 'Wait: No Notes';
@@ -128,7 +131,7 @@ function handleWaitModeNoteOn(midi) {
                 currentStepIndex++;
 
                 if (currentStepIndex >= waitSteps.length) {
-                    showStudioToast('🎉 Score Completed! Restarting from Measure 1');
+                    showStudioToast('Score completed');
                     currentStepIndex = 0;
                 }
                 renderCurrentWaitStep();
@@ -170,9 +173,9 @@ export function toggleWaitMode(forceState) {
         clearLitKeys();
         togglePianoTray(true); // Ensure piano keyboard is visible
         buildWaitSteps(state.currentVisualObj);
-        showStudioToast('🎯 Wait-For-Me Mode Active: Play the highlighted notes on your keyboard!');
+        showStudioToast('Wait Mode on');
     } else {
-        showStudioToast('🎯 Wait-For-Me Mode Off');
+        showStudioToast('Wait Mode off');
     }
 
     renderCurrentWaitStep();

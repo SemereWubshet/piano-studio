@@ -8,6 +8,7 @@ import { state } from './state.js';
 import { getLeadInSeconds, startCountdown, cancelCountdown, getIsCountingDown } from './countdown.js';
 import { lightUpKeys, clearLitKeys } from './piano-keyboard.js';
 import { refreshWaitModeForNewScore, resetWaitModeToStart, toggleWaitMode } from './wait-mode.js';
+import { decorateAudioBar, refreshClockTotal, initProgressBarScrubber } from './audio-bar-ui.js';
 
 export function parseTunes(abcText) {
     if (!abcText) return [];
@@ -59,6 +60,12 @@ export function setupAudioController(visualObj) {
                 });
             }
 
+            // Suppress intermediate key strikes while user is seeking/scrubbing
+            if (state.isSeeking) {
+                clearLitKeys();
+                return;
+            }
+
             // Light up piano keys with duration, warp (speed %), and re-strike support
             if (ev && ev.midiPitches && ev.midiPitches.length > 0) {
                 // Read the active tempo warp percentage (e.g. 50%, 100%, 150%)
@@ -101,7 +108,8 @@ export function setupAudioController(visualObj) {
         displayRestart: true,
         displayPlay: true,
         displayProgress: true,
-        displayWarp: true
+        displayWarp: true,
+        chordsOff: true
     });
 
     // Add keyboard shortcut tooltips to the ABCJS generated buttons
@@ -109,15 +117,55 @@ export function setupAudioController(visualObj) {
     if (playBtn) playBtn.title = "Play / Pause (P)";
     const loopBtn = audioControlsEl.querySelector('.abcjs-midi-loop');
     if (loopBtn) loopBtn.title = "Toggle Loop / Repeat (R)";
+    
+    // Rewind button: Rewinds to start AND pauses playback so it waits at beginning
     const resetBtn = audioControlsEl.querySelector('.abcjs-midi-reset');
-    if (resetBtn) resetBtn.title = "Reset to Start";
+    if (resetBtn && !resetBtn.dataset.rewindHooked) {
+        resetBtn.dataset.rewindHooked = "true";
+        resetBtn.title = "Rewind";
+        resetBtn.addEventListener('click', (e) => {
+            // Prevent ABCJS default restart which loops/continues playback if currently playing
+            e.preventDefault();
+            e.stopImmediatePropagation();
 
-    const createSynth = new ABCJS.synth.CreateSynth();
-    createSynth.init({ visualObj }).then(() => {
-        state.synthControl.setTune(visualObj, true, { program: 0 }).then(() => {
-            attachPlayLeadInHook(audioControlsEl);
-            refreshWaitModeForNewScore(visualObj);
-        });
+            cancelCountdown();
+
+            if (state.synthControl) {
+                try { state.synthControl.pause(); } catch (err) {}
+                try { state.synthControl.seek(0, 'percent'); } catch (err) {
+                    try { state.synthControl.seek(0); } catch (err2) {}
+                }
+            }
+
+            clearLitKeys();
+            document.querySelectorAll('.abcjs-note_selected').forEach(el => el.classList.remove('abcjs-note_selected'));
+
+            const playBtnEl = audioControlsEl.querySelector('.abcjs-midi-start');
+            if (playBtnEl) playBtnEl.classList.remove('abcjs-pushed');
+
+            const clock = document.querySelector('.abcjs-midi-clock');
+            if (clock) clock.textContent = '0:00';
+
+            const indicator = document.querySelector('.abcjs-midi-progress-indicator');
+            if (indicator) indicator.style.left = '0%';
+
+            if (state.isWaitMode) {
+                resetWaitModeToStart();
+            }
+        }, true); // Capture phase intercepts before ABCJS's default handler
+    }
+
+    // Cosmetic extras (BPM pill, lead-in placement, total time) - no ABCJS nodes are moved
+    decorateAudioBar(audioControlsEl, visualObj);
+
+    // Load tune into SynthController with chordsOff: true so no phantom chord tracks play
+    state.synthControl.setTune(visualObj, false, { chordsOff: true, program: 0 }).then(() => {
+        attachPlayLeadInHook(audioControlsEl);
+        initProgressBarScrubber(audioControlsEl);
+        refreshWaitModeForNewScore(visualObj);
+        refreshClockTotal();
+    }).catch(err => {
+        console.warn('Synth setTune warning:', err);
     });
 }
 
@@ -159,16 +207,5 @@ function attachPlayLeadInHook(container) {
             });
         }
     }, true); // Use capture phase so we intercept before ABCJS internal listener
-
-    // Also cancel countdown / reset Wait Mode if user clicks the reset button
-    const resetBtn = container.querySelector('.abcjs-midi-reset');
-    if (resetBtn) {
-        resetBtn.addEventListener('click', () => {
-            cancelCountdown();
-            if (state.isWaitMode) {
-                resetWaitModeToStart();
-            }
-        });
-    }
 }
 

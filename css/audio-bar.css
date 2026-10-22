@@ -1,200 +1,384 @@
-/* --- Audio Bar & ABCjs Player Styling --- */
+/* --- Audio Bar & ABCjs Player Styling (Docked Downstairs, Matching Reference) --- */
+
+/* Floating Rounded Card Audio Bar */
 #audio-bar { 
-    padding: 10px 20px; 
-    border-bottom: 1px solid var(--border); 
     display: flex; 
-    justify-content: space-between; 
     align-items: center; 
-    background: var(--bg-app); 
-    min-height: 60px; 
-    gap: 15px;
+    background: #ffffff; 
+    border: 1px solid var(--border-color, #e4dfd3); 
+    border-radius: 18px; 
+    height: 60px; 
+    margin: 10px 24px 14px; 
+    padding: 0 14px; 
+    box-shadow: 0 10px 28px rgba(59, 47, 26, 0.15); 
+    gap: 12px; 
+    z-index: 50; 
+    flex-shrink: 0; 
+    box-sizing: border-box;
 }
 
-.view-controls { 
-    display: flex; 
-    gap: 8px; 
-    align-items: center;
-    flex-shrink: 0;
-}
-
-#midi-audio-controls {
-    flex: 1;
-    width: 100%;
-}
-
-/* Controller Bar Container */
+/* 
+ * display: contents makes all children of #midi-audio-controls and .abcjs-inline-audio
+ * participate directly in #audio-bar's flex layout alongside #lead-in-container!
+ */
+#midi-audio-controls,
 .abcjs-inline-audio {
-    display: flex !important;
-    align-items: center !important;
-    background: var(--player-bg) !important;
-    border: 1px solid var(--player-border) !important;
-    border-radius: 8px !important;
-    padding: 6px 14px !important;
-    height: 42px !important;
-    gap: 8px !important;
-    width: 95% !important;
-    box-shadow: var(--player-shadow) !important;
+    display: contents !important;
 }
 
-/* Control Buttons (Play, Loop, Restart) */
-.abcjs-inline-audio button {
-    background: transparent !important;
+/* Base: Ensure ALL button icons are crisp dark obsidian, NEVER white-on-white */
+.abcjs-inline-audio .abcjs-btn svg,
+.abcjs-inline-audio .abcjs-btn svg *,
+.abcjs-inline-audio .abcjs-btn path,
+.abcjs-inline-audio .abcjs-btn polygon {
+    fill: #1d1b17 !important;
+    stroke: none !important;
+}
+
+/* Hide raw ABCJS tempo element; replaced by .bpm-pill */
+.abcjs-tempo-wrapper {
+    display: none !important;
+}
+
+/* 1. BPM Pill on the far left end (♩ = [ 100 ]) */
+.bpm-pill {
+    order: -2 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    height: 40px !important;
+    padding: 0 12px !important;
+    border-radius: 12px !important;
+    background: #f4f1ea !important;
+    font-size: 13px !important;
+    color: #6b665a !important;
+    font-family: var(--font-sans) !important;
+    user-select: none !important;
+    flex-shrink: 0 !important;
+    cursor: default !important;
+}
+
+.bpm-pill .bpm-note {
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    color: #6b665a !important;
+}
+
+.bpm-pill input {
+    all: unset !important;
+    width: 36px !important;
+    text-align: center !important;
+    font-size: 18px !important;
+    font-weight: 700 !important;
+    color: #1d1b17 !important;
+    border-bottom: 2px solid #b9b3a3 !important;
+    font-family: var(--font-sans) !important;
+    cursor: text !important;
+    -moz-appearance: textfield !important;
+}
+
+.bpm-pill input::-webkit-outer-spin-button,
+.bpm-pill input::-webkit-inner-spin-button {
+    -webkit-appearance: none !important;
+    margin: 0 !important;
+}
+
+/* 2. Reset / Back to start button (⏮ matching Main.dc.html) */
+.abcjs-midi-reset {
+    order: -1 !important;
+    all: unset !important;
+    cursor: pointer !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 38px !important;
+    height: 38px !important;
+    min-width: 38px !important;
+    border-radius: 12px !important;
+    font-size: 17px !important;
+    color: #1d1b17 !important;
+    transition: background 0.15s ease !important;
+    padding: 0 !important;
+    flex-shrink: 0 !important;
+}
+
+.abcjs-midi-reset:hover {
+    background: #f4f1ea !important;
+}
+
+.abcjs-midi-reset svg {
+    display: none !important;
+}
+
+.abcjs-midi-reset::before {
+    content: '⏮';
+    font-size: 17px;
+    line-height: 1;
+    color: #1d1b17;
+}
+
+/* 3. The Play Button (Always Amber Circle, Pause Icon when Playing) */
+#audio-bar button.abcjs-midi-start,
+#audio-bar .abcjs-inline-audio button.abcjs-midi-start,
+.abcjs-inline-audio .abcjs-btn.abcjs-midi-start,
+.abcjs-midi-start,
+.abcjs-midi-start.abcjs-pushed {
+    order: 1 !important;
+    width: 46px !important;
+    height: 46px !important;
+    min-width: 46px !important;
+    border-radius: 50% !important;
+    background-color: var(--color-amber, #f2b84b) !important;
+    background: var(--color-amber, #f2b84b) !important;
     border: none !important;
-    color: var(--player-btn-color) !important;
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
     cursor: pointer !important;
-    padding: 6px !important;
-    border-radius: 6px !important;
-    transition: color 0.15s ease, background-color 0.15s ease !important;
-}
-
-.abcjs-inline-audio button:hover {
-    color: var(--player-btn-hover-color) !important;
-    background-color: var(--player-btn-hover-bg) !important;
-}
-
-/* Slider Track (Groove) */
-.abcjs-midi-progress-background {
-    background-color: var(--seeker-track-bg) !important;
-    border-radius: 10px !important;
-    height: var(--seeker-track-height) !important;
-    border: none !important;
-    flex: 1 !important;
-    min-width: 0 !important; 
-    cursor: pointer;
-    overflow: hidden !important; /* Clips the indicator strictly within track boundaries */
-    display: flex !important;
-    align-items: center !important;
+    box-shadow: 0 2px 8px rgba(242, 184, 75, 0.45) !important;
+    transition: transform 0.15s ease, background-color 0.15s ease !important;
+    position: relative !important;
+    z-index: 2 !important;
     padding: 0 !important;
     margin: 0 !important;
+    flex-shrink: 0 !important;
 }
 
-/* Seeker Fill / Progress Indicator */
-.abcjs-midi-progress-indicator {
-    background-color: var(--seeker-fill-color) !important;
-    border-radius: 4px !important;
-    height: var(--seeker-track-height) !important;
-    margin: 4px 0 0 0 !important;
-    padding: 0 !important;
-    border: none !important;
-    max-width: 100% !important;  /* Never exceed the track */
-    box-sizing: border-box !important;
-    transition: width 0.1s linear, background-color 0.15s ease; 
+#audio-bar button.abcjs-midi-start:hover,
+.abcjs-midi-start:hover,
+.abcjs-midi-start.abcjs-pushed:hover {
+    background-color: #e5a735 !important;
+    background: #e5a735 !important;
+    transform: scale(1.04);
 }
 
-/* Hover on seeker track or fill */
-.abcjs-midi-progress-background:hover .abcjs-midi-progress-indicator,
-.abcjs-midi-progress-indicator:hover {
-    background-color: var(--seeker-fill-hover) !important;
+.abcjs-midi-start:active,
+.abcjs-midi-start.abcjs-pushed:active {
+    transform: scale(0.96);
 }
 
-/* Clicking / scrubbing */
-.abcjs-midi-progress-background:active .abcjs-midi-progress-indicator,
-.abcjs-midi-progress-indicator:active {
-    background-color: var(--seeker-fill-active) !important;
+.abcjs-midi-start svg,
+.abcjs-midi-start svg *,
+.abcjs-midi-start path,
+.abcjs-midi-start polygon {
+    width: 18px !important;
+    height: 18px !important;
+    fill: #1d1b17 !important;
+    stroke: none !important;
 }
 
-/* Active Toggle Buttons (e.g. Loop/Repeat active state) */
-.abcjs-btn.abcjs-pushed {
-    background-color: var(--player-btn-active-bg) !important;
-    border-radius: 6px !important;
-}
-
-.abcjs-btn.abcjs-pushed svg {
-    fill: var(--player-btn-active-icon) !important;
-}
-
-/* --- Lead-in Countdown Control --- */
-.lead-in-control {
-    position: relative;
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    background: var(--bg-card, #ffffff);
-    border: 1px solid var(--border, #e2e8f0);
-    border-radius: 8px;
-    padding: 4px 10px;
-    font-size: 0.85rem;
-    font-weight: 500;
-    color: var(--text-secondary, #64748b);
-    user-select: none;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
-    transition: border-color 0.2s ease, box-shadow 0.2s ease;
-}
-
-.lead-in-control.is-counting {
-    border-color: #fbbf24;
-    box-shadow: 0 0 10px rgba(251, 191, 36, 0.35);
-}
-
-.lead-in-label {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-}
-
-.lead-in-control input[type="number"] {
-    width: 44px;
-    padding: 3px 6px;
-    border: 1px solid var(--border, #cbd5e1);
-    border-radius: 6px;
-    background: var(--bg-app, #f8fafc);
-    color: var(--text-primary, #0f172a);
-    font-size: 0.9rem;
-    font-weight: 600;
-    text-align: center;
-    outline: none;
-    transition: border-color 0.15s ease, box-shadow 0.15s ease;
-}
-
-.lead-in-control input[type="number"]:focus {
-    border-color: var(--accent, #1d4ed8);
-    box-shadow: 0 0 0 2px rgba(29, 78, 216, 0.15);
-}
-
-.lead-in-unit {
-    font-size: 0.8rem;
-    color: var(--text-muted, #94a3b8);
-}
-
-/* Inline Countdown Badge replacing/overlaying right in the control */
-.lead-in-badge {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 28px;
-    height: 26px;
-    padding: 0 6px;
-    border-radius: 6px;
-    background: #0f172a;
-    color: #fbbf24;
-    font-weight: 700;
-    font-size: 0.95rem;
-    cursor: pointer;
-    border: 1px solid rgba(251, 191, 36, 0.5);
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-    animation: leadInTick 0.85s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-.lead-in-badge.hidden {
+/* When playing (.abcjs-pushed): hide default stop square and show clean pause symbol */
+.abcjs-midi-start.abcjs-pushed svg {
     display: none !important;
 }
 
-@keyframes leadInTick {
-    0% {
-        transform: scale(1.3);
-        background: #1e293b;
-        color: #ffffff;
-    }
-    50% {
-        transform: scale(1.05);
-        color: #fbbf24;
-    }
-    100% {
-        transform: scale(1.0);
-    }
+.abcjs-midi-start.abcjs-pushed::after {
+    content: '';
+    display: inline-block;
+    width: 15px;
+    height: 15px;
+    background: 
+        linear-gradient(to right, 
+            #1d1b17 0%, #1d1b17 38%, 
+            transparent 38%, transparent 62%, 
+            #1d1b17 62%, #1d1b17 100%
+        );
+    border-radius: 1.5px;
 }
 
+/* 4. Repeat Button Attached to Top-Right of Play Button (⟲ matching Main.dc.html) */
+.abcjs-midi-loop {
+    order: 2 !important;
+    width: 28px !important;
+    height: 28px !important;
+    min-width: 28px !important;
+    border-radius: 50% !important;
+    background: #ffffff !important;
+    border: 1px solid var(--border-color, #e4dfd3) !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    cursor: pointer !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12) !important;
+    z-index: 5 !important;
+    margin-left: -16px !important;
+    margin-top: -22px !important;
+    margin-right: 6px !important;
+    padding: 0 !important;
+    transition: all 0.15s ease !important;
+    flex-shrink: 0 !important;
+}
 
+.abcjs-midi-loop:hover {
+    background: #f4f1ea !important;
+}
+
+.abcjs-midi-loop svg {
+    display: none !important;
+}
+
+.abcjs-midi-loop::before {
+    content: '⟲';
+    font-size: 15px;
+    line-height: 1;
+    color: #6b665a;
+}
+
+.abcjs-midi-loop.abcjs-pushed {
+    background: var(--color-amber-bg, #fbf0d6) !important;
+    border-color: var(--color-amber, #f2b84b) !important;
+}
+
+.abcjs-midi-loop.abcjs-pushed::before {
+    color: #8a5a00 !important;
+    font-weight: 700 !important;
+}
+
+/* 5. Lead-in Countdown Control (Positioned between Play/Repeat & Clock/Seeker) */
+.lead-in-control {
+    order: 3 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 2px !important;
+    height: 40px !important;
+    padding: 0 6px 0 12px !important;
+    border-radius: 12px !important;
+    background: #f4f1ea !important;
+    border: 1px solid var(--border-color, #e4dfd3) !important;
+    color: #6b665a !important;
+    font-size: 13px !important;
+    font-weight: 500 !important;
+    user-select: none !important;
+    transition: border-color 0.15s ease, background-color 0.15s ease !important;
+    flex-shrink: 0 !important;
+}
+
+.lead-in-control.is-counting {
+    border-color: var(--color-amber, #f2b84b) !important;
+    background: var(--color-amber-bg, #fbf0d6) !important;
+}
+
+.lead-in-control.is-counting .lead-in-step-btn {
+    display: none !important;
+}
+
+.lead-in-icon {
+    width: 16px !important;
+    height: 16px !important;
+    color: #6b665a !important;
+    flex-shrink: 0 !important;
+    margin-right: 2px !important;
+}
+
+.lead-in-step-btn {
+    all: unset !important;
+    cursor: pointer !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 26px !important;
+    height: 26px !important;
+    border-radius: 7px !important;
+    font-size: 16px !important;
+    color: #6b665a !important;
+    font-weight: 600 !important;
+    transition: background-color 0.15s, color 0.15s !important;
+}
+
+.lead-in-step-btn:hover {
+    background-color: rgba(0, 0, 0, 0.06) !important;
+    color: #1d1b17 !important;
+}
+
+.lead-in-control input[type="number"] {
+    all: unset !important;
+    width: 18px !important;
+    text-align: center !important;
+    font-size: 17px !important;
+    font-weight: 700 !important;
+    color: #1d1b17 !important;
+    font-family: var(--font-sans) !important;
+    -moz-appearance: textfield !important;
+}
+
+.lead-in-control input[type="number"]::-webkit-outer-spin-button,
+.lead-in-control input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none !important;
+    margin: 0 !important;
+}
+
+.lead-in-unit {
+    font-size: 12px !important;
+    color: #6b665a !important;
+    padding-right: 4px !important;
+}
+
+/* 6. Playback Time Display (0:08 / 0:32) */
+.abcjs-midi-clock {
+    order: 4 !important;
+    font-size: 13px !important;
+    color: #6b665a !important;
+    font-variant-numeric: tabular-nums !important;
+    font-family: var(--font-sans) !important;
+    width: 84px !important;
+    min-width: 84px !important;
+    text-align: center !important;
+    font-weight: 500 !important;
+    flex-shrink: 0 !important;
+    margin: 0 4px !important;
+}
+
+.abcjs-midi-clock[data-total]::after {
+    content: " / " attr(data-total);
+    color: #6b665a;
+}
+
+/* 7. Seeker Track, Amber Fill & Navy Thumb (━━━━●━━━━) */
+.abcjs-midi-progress-background {
+    order: 5 !important;
+    background-color: var(--seeker-track-bg, #e4dfd3) !important;
+    border-radius: 3px !important;
+    height: 6px !important;
+    border: none !important;
+    flex: 1 !important;
+    min-width: 100px !important;
+    cursor: pointer !important;
+    overflow: hidden !important;
+    display: flex !important;
+    align-items: center !important;
+    position: relative !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    user-select: none !important;
+    touch-action: none !important;
+}
+
+.abcjs-midi-progress-indicator {
+    position: absolute !important;
+    top: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    width: 14px !important;
+    height: 14px !important;
+    border-radius: 50% !important;
+    background: #114882 !important; /* Navy thumb matching reference */
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25) !important;
+    border: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    pointer-events: none !important; /* Critical: prevents thumb from capturing click offsetX */
+}
+
+/* Dynamic backward amber fill bar reaching from the left up to the thumb */
+.abcjs-midi-progress-indicator::before {
+    content: '';
+    position: absolute;
+    right: 50%;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 2000px;
+    height: 6px;
+    background: #f2b84b;
+    border-radius: 3px 0 0 3px;
+    pointer-events: none !important;
+    z-index: -1;
+}

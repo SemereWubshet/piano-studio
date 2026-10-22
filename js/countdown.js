@@ -64,6 +64,7 @@ export function getIsCountingDown() {
 
 /**
  * Starts the lead-in countdown and invokes onComplete when it reaches 0.
+ * The input number itself counts down smoothly (no duplicate badge).
  */
 export function startCountdown(onComplete) {
     cancelCountdown();
@@ -79,29 +80,16 @@ export function startCountdown(onComplete) {
 
     const container = document.getElementById('lead-in-container');
     const input = document.getElementById('lead-in-input');
-    const badge = document.getElementById('lead-in-badge');
 
     if (container) container.classList.add('is-counting');
-    if (input) input.style.display = 'none';
-    if (badge) {
-        badge.textContent = remaining;
-        badge.classList.remove('hidden');
-        badge.style.animation = 'none';
-        void badge.offsetWidth;
-        badge.style.animation = '';
-    }
+    if (input) input.value = remaining;
 
     playMetronomeTick(false);
 
     countdownInterval = setInterval(() => {
         remaining--;
         if (remaining > 0) {
-            if (badge) {
-                badge.textContent = remaining;
-                badge.style.animation = 'none';
-                void badge.offsetWidth;
-                badge.style.animation = '';
-            }
+            if (input) input.value = remaining;
             playMetronomeTick(false);
         } else {
             // Reached zero: play final high tick, restore input, and start playback
@@ -124,17 +112,16 @@ export function cancelCountdown() {
 
     const container = document.getElementById('lead-in-container');
     const input = document.getElementById('lead-in-input');
-    const badge = document.getElementById('lead-in-badge');
 
     if (container) container.classList.remove('is-counting');
-    if (input) input.style.display = '';
-    if (badge) badge.classList.add('hidden');
+    if (input) input.value = getLeadInSeconds();
 }
 
 /**
  * Initializes the lead-in UI input and binds event handlers.
  */
 export function initCountdownUI() {
+    const container = document.getElementById('lead-in-container');
     const input = document.getElementById('lead-in-input');
     if (input) {
         input.value = getLeadInSeconds();
@@ -147,12 +134,20 @@ export function initCountdownUI() {
         });
     }
 
-    // Clicking the countdown badge cancels it
-    const badge = document.getElementById('lead-in-badge');
-    if (badge) {
-        badge.addEventListener('click', () => {
+    // −/+ stepper buttons (adjust lead-in by 1 second)
+    const stepLeadIn = (delta) => {
+        if (isCountingDown) cancelCountdown();
+        setLeadInSeconds(getLeadInSeconds() + delta);
+        if (input) input.value = getLeadInSeconds();
+    };
+    document.getElementById('lead-in-minus')?.addEventListener('click', () => stepLeadIn(-1));
+    document.getElementById('lead-in-plus')?.addEventListener('click', () => stepLeadIn(1));
+
+    // Clicking the container while counting down cancels it
+    container?.addEventListener('click', (e) => {
+        if (isCountingDown && e.target !== input) {
             cancelCountdown();
-        });
-    }
+        }
+    });
 }
 

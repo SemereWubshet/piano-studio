@@ -3,63 +3,196 @@
     display: flex; 
     height: 100vh; 
     width: 100vw; 
+    overflow: hidden;
+    background: var(--bg-app);
 }
 
 #main-stage { 
     flex: 1; 
     display: flex; 
     flex-direction: column; 
-    background: var(--bg-card); 
+    background: var(--bg-app); 
     min-width: 0; 
+    position: relative;
+    overflow: hidden;
 }
 
+/* --- Top Bar Header --- */
 #top-bar { 
-    padding: 14px 20px; 
-    border-bottom: 1px solid var(--border); 
+    height: 56px;
+    padding: 0 16px; 
+    border-bottom: 1px solid var(--border-color); 
+    background: var(--bg-app);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+    z-index: 10;
+}
+
+.score-title-group {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+}
+
+.score-headings {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.2;
+    min-width: 0;
 }
 
 #active-score-title { 
-    font-size: 1.25rem; 
+    font-family: var(--font-serif); 
+    font-size: 19px; 
+    font-weight: 600;
+    color: var(--text-primary);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    padding: 0 16px;
+    padding: 0;
+    margin: 0;
 }
 
+#active-score-composer {
+    font-size: 12px;
+    color: var(--text-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.top-bar-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+/* Action button states in header */
+#btn-wait-mode.active,
+#btn-toggle-keyboard.active {
+    background: var(--color-amber-bg) !important;
+    border-color: var(--color-amber-border) !important;
+    color: var(--color-amber-text) !important;
+    font-weight: 700 !important;
+}
+
+#btn-toggle-editor.active {
+    background: var(--color-primary-hover) !important;
+    color: #ffffff !important;
+}
+
+/* --- Main Workspace Body --- */
 #workspace-body { 
     flex: 1; 
     display: flex; 
     overflow: hidden; 
     position: relative; 
+    background: var(--bg-app);
 }
 
+/* Sheet Music Stage Area */
 #sheet-wrapper { 
     flex: 1; 
     overflow: auto; 
-    padding: 40px; 
+    padding: 30px; 
     box-sizing: border-box;
+    position: relative;
 }
 
+/* Paper Card for Sheet Music */
 #paper-stage {
-    display: inline-flex;
+    display: flex;
     justify-content: center;
     align-items: flex-start;
     min-width: 100%;
+    width: max-content;
+    margin: 0 auto;
     box-sizing: border-box;
 }
 
 #paper { 
     display: inline-block; 
     transform-origin: top center; 
+    background: var(--bg-stage-card, #fffdf8);
+    border: 1px solid var(--border-color, #e4dfd3);
+    border-radius: 16px;
+    padding: 24px 30px;
+    box-shadow: 0 8px 30px rgba(59, 47, 26, 0.08);
+    box-sizing: border-box;
 }
 
 /* Ensure ABCJS SVG fills cleanly */
 #paper svg { 
     max-width: none; 
+    display: block;
 }
 
-/* ABCJS Custom Cursor Override (Note Highlight) */
-.abcjs-note_selected { 
-    fill: var(--accent) !important; 
+/* ABCJS Note Highlight (Single clean light amber color, zero shadow or flash) */
+.abcjs-note_selected,
+.abcjs-note_selected * { 
+    fill: #f2b84b !important; 
+    stroke: #f2b84b !important;
+    filter: none !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
 }
 
+/* Floating Zoom Controls on Sheet Stage */
+.sheet-zoom-overlay {
+    position: absolute;
+    top: 14px;
+    right: 24px;
+    z-index: 30;
+    opacity: 0.35;
+    transition: opacity 0.2s ease;
+}
+
+.sheet-zoom-overlay:hover,
+.sheet-zoom-overlay:focus-within {
+    opacity: 1;
+}
+
+.zoom-pill {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    padding: 3px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.94);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid var(--border-color);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.zoom-btn {
+    all: unset;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+    transition: background 0.15s ease;
+}
+
+.zoom-btn:hover {
+    background: var(--bg-hover);
+}
+
+.zoom-text {
+    font-size: 12px;
+    color: var(--text-muted);
+    width: 38px;
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+    font-weight: 500;
+}

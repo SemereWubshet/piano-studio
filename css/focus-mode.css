@@ -1,4 +1,4 @@
-/* --- Focus Mode (Sheet Only) --- */
+/* --- Focus Mode (Distraction-Free Practice View) --- */
 body.focus-mode #sidebar {
     display: none !important;
 }
@@ -7,80 +7,194 @@ body.focus-mode #top-bar {
     display: none !important;
 }
 
-body.focus-mode #audio-bar {
-    display: none !important;
-}
-
 body.focus-mode #editor-drawer {
     display: none !important;
 }
 
-body.focus-mode #sheet-wrapper {
-    padding: 10px 20px !important;
+body.focus-mode .sheet-zoom-overlay {
+    display: none !important;
 }
 
-/* Floating Focus Controls Toolbar */
+body.focus-mode #sheet-wrapper {
+    padding: 12px 24px !important;
+    background: var(--bg-stage-card, #fffdf8) !important;
+}
+
+body.focus-mode #paper-stage {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 10px 0 !important;
+}
+
+/* Floating Focus Bar (Top Right) */
 #focus-controls {
     position: fixed;
-    top: 14px;
-    right: 18px;
-    z-index: 9999;
+    top: 16px;
+    right: 16px;
+    height: 50px;
+    padding: 0 10px;
+    border-radius: 14px;
     display: none;
-    background: rgba(30, 41, 59, 0.85);
-    color: #ffffff;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    padding: 4px 8px;
-    border-radius: 20px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
-    transition: opacity 0.2s ease, transform 0.2s ease;
-    opacity: 0.35;
     align-items: center;
-    gap: 6px;
+    gap: 8px;
+    background: rgba(255, 255, 255, 0.88);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border: 1px solid rgba(228, 223, 211, 0.9);
+    box-shadow: 0 10px 30px rgba(59, 47, 26, 0.12);
+    z-index: 1000;
     user-select: none;
-}
-
-#focus-controls:hover {
+    transition: opacity 0.4s ease, transform 0.4s ease;
     opacity: 1;
-    background: rgba(15, 23, 42, 0.95);
-    transform: translateY(-1px);
 }
 
 body.focus-mode #focus-controls {
-    display: inline-flex;
+    display: flex;
+}
+
+#focus-controls.faded {
+    opacity: 0;
+    pointer-events: none;
+}
+
+#focus-controls:hover {
+    opacity: 1 !important;
+    pointer-events: auto !important;
 }
 
 .focus-btn {
-    background: rgba(255, 255, 255, 0.1);
-    color: #ffffff;
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    border-radius: 12px;
+    all: unset;
     cursor: pointer;
-    padding: 3px 8px;
-    font-size: 0.8rem;
-    font-weight: 600;
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    gap: 6px;
+    height: 34px;
+    padding: 0 10px;
+    border-radius: 9px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-muted);
     transition: all 0.15s ease;
 }
 
 .focus-btn:hover {
-    background: rgba(255, 255, 255, 0.25);
-    color: #ffffff;
+    background: var(--bg-hover);
+    color: var(--text-primary);
+}
+
+.focus-btn.active {
+    background: var(--color-amber-bg);
+    color: var(--color-amber-text);
+    font-weight: 700;
 }
 
 .focus-btn.focus-exit {
-    gap: 4px;
-    margin-left: 4px;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.focus-btn.focus-zoom-btn {
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    border-radius: 8px;
+    font-size: 16px;
 }
 
 #focus-zoom-level {
-    font-size: 0.75rem;
-    font-weight: 500;
-    color: #cbd5e1;
-    min-width: 36px;
+    font-size: 12px;
+    color: var(--text-muted);
+    width: 38px;
     text-align: center;
+    font-weight: 500;
 }
 
+.focus-divider {
+    width: 1px;
+    height: 20px;
+    background: var(--border-color);
+}
+
+/* Floating Mini Audio Bar in Focus Mode (Full Width matching regular mode, auto-hides on idle) */
+body.focus-mode #audio-bar {
+    position: fixed !important;
+    bottom: 14px !important;
+    left: 24px !important;
+    right: 24px !important;
+    width: auto !important;
+    max-width: none !important;
+    transform: none !important;
+    display: flex !important;
+    height: 56px !important;
+    min-height: 56px !important;
+    margin: 0 !important;
+    padding: 0 16px !important;
+    border-radius: 18px !important;
+    background: rgba(255, 255, 255, 0.94) !important;
+    backdrop-filter: blur(14px) !important;
+    -webkit-backdrop-filter: blur(14px) !important;
+    border: 1px solid rgba(228, 223, 211, 0.9) !important;
+    box-shadow: 0 10px 30px rgba(59, 47, 26, 0.15) !important;
+    z-index: 200 !important;
+    transition: opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1), transform 0.35s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+/* If piano tray is open in focus mode, float the audio bar nicely above the piano */
+body.focus-mode:has(#piano-dock.open) #audio-bar {
+    bottom: calc(var(--piano-h, 96px) + 12px) !important;
+}
+
+body.focus-mode #audio-bar.faded {
+    opacity: 0 !important;
+    pointer-events: none !important;
+    transform: translateY(8px) !important;
+}
+
+body.focus-mode #audio-bar:hover,
+body.focus-mode #audio-bar:focus-within {
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    transform: none !important;
+}
+
+body.focus-mode .bpm-pill,
+body.focus-mode .lead-in-control {
+    height: 34px !important;
+    padding: 0 8px !important;
+}
+
+body.focus-mode .abcjs-midi-reset {
+    width: 32px !important;
+    height: 32px !important;
+    min-width: 32px !important;
+}
+
+body.focus-mode .abcjs-midi-start {
+    width: 38px !important;
+    height: 38px !important;
+    min-width: 38px !important;
+    font-size: 15px !important;
+}
+
+body.focus-mode .abcjs-midi-loop {
+    width: 22px !important;
+    height: 22px !important;
+    min-width: 22px !important;
+    margin-left: -14px !important;
+    margin-top: -18px !important;
+}
+
+/* Piano Dock in Focus Mode: When open, stays permanently docked and visible */
+body.focus-mode #piano-dock {
+    --piano-h: 96px !important;
+    min-height: 70px !important;
+    padding: 0 10px 6px !important;
+    position: relative !important;
+    z-index: 100 !important;
+    opacity: 1 !important;
+    transform: none !important;
+    pointer-events: auto !important;
+    transition: none !important;
+}

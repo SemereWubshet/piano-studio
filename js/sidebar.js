@@ -18,17 +18,12 @@ export function renderSidebar(onSelectTune) {
         const li = document.createElement('li');
         li.className = 'score-item';
 
-        // 1. Folder Header
+        // 1. Score Item Header (No caret icon, stands cleanly by itself)
         const header = document.createElement('div');
         header.className = `score-header ${fileName === state.activeFileName ? 'active' : ''}`;
         const isOpen = state.expandedFiles.has(fileName);
 
-        header.innerHTML = `
-            <svg class="toggle-icon ${isOpen ? 'open' : ''}" viewBox="0 0 24 24">
-                <path d="M8.59 16.59 13.17 12 8.59 7.41 10 6l6 6-6 6z"/>
-            </svg>
-            <span>${fileName.replace('.abc', '')}</span>
-        `;
+        header.innerHTML = `<span>${fileName.replace('.abc', '')}</span>`;
 
         header.onclick = () => {
             toggleExpandedFile(fileName);
@@ -36,7 +31,7 @@ export function renderSidebar(onSelectTune) {
         };
         li.appendChild(header);
 
-        // 2. Indented Tunes List
+        // 2. Indented Tunes List (No numbers, clean titles with indentation)
         const tunesAbc = parseTunes(state.fileContents[fileName] || '');
         const tuneUl = document.createElement('ul');
         tuneUl.className = `tune-list ${isOpen ? 'open' : ''}`;
@@ -46,7 +41,7 @@ export function renderSidebar(onSelectTune) {
             const tuneTitle = titleMatch ? titleMatch[1].trim() : `Song ${index + 1}`;
 
             const tuneLi = document.createElement('li');
-            tuneLi.textContent = `${index + 1}. ${tuneTitle}`;
+            tuneLi.textContent = tuneTitle;
 
             if (fileName === state.activeFileName && index === state.activeTuneIndex) {
                 tuneLi.classList.add('active-tune');
@@ -68,15 +63,40 @@ export function renderSidebar(onSelectTune) {
 export function initSidebarControls() {
     const sidebarEl = document.getElementById("sidebar");
     const toggleSidebarBtn = document.getElementById("btn-toggle-sidebar");
+    const expandSidebarBtn = document.getElementById("btn-expand-sidebar");
+    const shortcutsBtn = document.getElementById("btn-shortcuts");
+    const shortcutsDialog = document.getElementById("shortcuts-dialog");
 
     if (!sidebarEl) return;
 
-    // Toggle Collapse
+    const toggleSidebar = () => {
+        sidebarEl.style.setProperty('--sidebar-w', `${sidebarEl.offsetWidth}px`);
+        const isCollapsed = sidebarEl.classList.toggle("collapsed");
+        if (expandSidebarBtn) {
+            expandSidebarBtn.style.display = isCollapsed ? 'inline-flex' : 'none';
+        }
+        setTimeout(centerSheetMusic, 280);
+    };
+
+    // Toggle Collapse / Expand
     if (toggleSidebarBtn) {
-        toggleSidebarBtn.addEventListener("click", () => {
-            sidebarEl.style.setProperty('--sidebar-w', `${sidebarEl.offsetWidth}px`);
-            sidebarEl.classList.toggle("collapsed");
-            setTimeout(centerSheetMusic, 280);
+        toggleSidebarBtn.addEventListener("click", toggleSidebar);
+    }
+    if (expandSidebarBtn) {
+        expandSidebarBtn.addEventListener("click", toggleSidebar);
+    }
+
+    // Keyboard Shortcuts Dialog Toggle
+    if (shortcutsBtn && shortcutsDialog) {
+        shortcutsBtn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            shortcutsDialog.classList.toggle("hidden");
+        });
+
+        document.addEventListener("click", (e) => {
+            if (!shortcutsDialog.classList.contains("hidden") && !shortcutsDialog.contains(e.target) && e.target !== shortcutsBtn) {
+                shortcutsDialog.classList.add("hidden");
+            }
         });
     }
 
