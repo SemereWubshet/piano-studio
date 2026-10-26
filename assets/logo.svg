@@ -1,23 +1,15 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-112 -112 224 224">
   <title>Piano Studio</title>
-  <g transform="translate(50 50)">
-    <g fill="#E9A820">
-      <ellipse cy="-30" rx="6" ry="17"/>
-      <ellipse cy="-30" rx="6" ry="17" transform="rotate(60)"/>
-      <ellipse cy="-30" rx="6" ry="17" transform="rotate(90)"/>
-      <ellipse cy="-30" rx="6" ry="17" transform="rotate(150)"/>
-      <ellipse cy="-30" rx="6" ry="17" transform="rotate(210)"/>
-      <ellipse cy="-30" rx="6" ry="17" transform="rotate(270)"/>
-      <ellipse cy="-30" rx="6" ry="17" transform="rotate(300)"/>
-    </g>
-    <!-- <g fill="#f2b84b"> -->
-    <g fill="#000000">
-      <ellipse cy="-26" rx="5" ry="11" transform="rotate(30)"/>
-      <ellipse cy="-26" rx="5" ry="11" transform="rotate(120)"/>
-      <ellipse cy="-26" rx="5" ry="11" transform="rotate(180)"/>
-      <ellipse cy="-26" rx="5" ry="11" transform="rotate(240)"/>
-      <ellipse cy="-26" rx="5" ry="11" transform="rotate(330)"/>
-      <circle r="9"/>
-    </g>
-  </g>
+  <defs>
+    <path id="petal" d="M0 -12 C-16 -26 -32 -56 -22 -84 C-16 -96 -6 -104 -1 -108 C6 -100 18 -88 20 -76 C24 -52 18 -32 0 -12Z" fill="#F4BE1C" stroke="#1a1a1a" stroke-width="2" stroke-linejoin="round"/>
+  </defs>
+  <use href="#petal"/>
+  <use href="#petal" transform="rotate(45)"/>
+  <use href="#petal" transform="rotate(90)"/>
+  <use href="#petal" transform="rotate(135)"/>
+  <use href="#petal" transform="rotate(180)"/>
+  <use href="#petal" transform="rotate(225)"/>
+  <use href="#petal" transform="rotate(270)"/>
+  <use href="#petal" transform="rotate(315)"/>
+  <circle r="17" fill="#E08A1E" stroke="#1a1a1a" stroke-width="2"/>
 </svg>

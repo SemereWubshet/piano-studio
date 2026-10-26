@@ -14,6 +14,7 @@ import { initCountdownUI } from './countdown.js';
 import { initPianoKeyboard } from './piano-keyboard.js';
 import { initMidiEngine, showStudioToast } from './midi-engine.js';
 import { initWaitMode } from './wait-mode.js';
+import { initTimingCoach } from './timing-coach.js';
 import { initMidiShortcuts } from './midi-shortcuts.js';
 import { initMidiRecorder } from './midi-recorder.js';
 import { getCurrentVoiceId, setPianoVoice, getIsSustainEnabled, toggleSustainPedal } from './piano-synth.js';
@@ -32,6 +33,7 @@ class PianoStudioApp {
         this.initVoiceSelector();
         this.initSustainToggle();
         initWaitMode();
+        initTimingCoach();
         initMidiShortcuts();
         initMidiRecorder();
         initMidiEngine();

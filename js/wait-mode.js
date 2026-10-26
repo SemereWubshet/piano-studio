@@ -218,9 +218,9 @@ export function toggleWaitMode(forceState) {
         clearLitKeys();
         togglePianoTray(true); // Ensure piano keyboard is visible
         buildWaitSteps(state.currentVisualObj);
-        showStudioToast('Wait Mode on');
+        showStudioToast('Wait Mode On');
     } else {
-        showStudioToast('Wait Mode off');
+        showStudioToast('Wait Mode Off');
     }
 
     renderCurrentWaitStep();

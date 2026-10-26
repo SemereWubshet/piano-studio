@@ -15,6 +15,7 @@ export const state = {
     synthControl: null,
     currentVisualObj: null, // Active ABCJS visualObj for timing/wait-mode
     isWaitMode: false,      // Interactive Wait-For-Me practice mode
+    isTimingCoach: false,   // Engraved timing accuracy marks on sheet music (default off)
     isRecordingMidi: false, // Live MIDI-to-ABC editor recording
     isSeeking: false,       // Suppresses rapid intermediate key strikes during scrubber jumps
     lastFolderSyncTime: "0",

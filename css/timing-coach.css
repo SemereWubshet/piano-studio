@@ -1,0 +1,58 @@
+/* ==========================================================================
+   Piano Studio - Timing Coach & Engraved Ink Marks Overlay
+   Muted, paper-native palette designed for cream sheet music:
+   - On-time: Soft botanical sage (#4a7856) filled dot
+   - Drifting (early/late): Dusty ochre (#9c6b30) filled dot
+   - Wrong note: Muted brick (#a8463b) hollow ring at played pitch height
+   ========================================================================== */
+
+#timing-overlay-layer {
+    pointer-events: none;
+}
+
+@keyframes inkDotSettle {
+    0% {
+        opacity: 0;
+        transform: scale(1.75);
+    }
+    60% {
+        opacity: 0.95;
+        transform: scale(0.92);
+    }
+    100% {
+        opacity: 0.88;
+        transform: scale(1);
+    }
+}
+
+.timing-mark {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: inkDotSettle 0.18s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    pointer-events: none;
+}
+
+/* On-Time + Correct Pitch: Soft Muted Sage Filled Dot */
+.timing-mark-on-time {
+    fill: #4a7856;
+    stroke: #fffdf8;
+    stroke-width: 0.8px;
+    opacity: 0.9;
+}
+
+/* Early / Late Drift + Correct Pitch: Dusty Ochre Filled Dot */
+.timing-mark-drift {
+    fill: #9c6b30;
+    stroke: #fffdf8;
+    stroke-width: 0.8px;
+    opacity: 0.9;
+}
+
+/* Wrong Pitch: Muted Brick Hollow Ring */
+.timing-mark-wrong {
+    fill: none;
+    stroke: #a8463b;
+    stroke-width: 1.65px;
+    opacity: 0.9;
+}
+

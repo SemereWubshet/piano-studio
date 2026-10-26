@@ -9,6 +9,7 @@ import { getLeadInSeconds, startCountdown, cancelCountdown, getIsCountingDown } 
 import { lightUpKeys, clearLitKeys } from './piano-keyboard.js';
 import { refreshWaitModeForNewScore, resetWaitModeToStart, toggleWaitMode } from './wait-mode.js';
 import { decorateAudioBar, refreshClockTotal, initProgressBarScrubber } from './audio-bar-ui.js';
+import { setupTimingCoachForScore, notifyTimingPlaybackStart, notifyTimingPlaybackEvent, notifyTimingPlaybackStop } from './timing-coach.js';
 
 export function parseTunes(abcText) {
     if (!abcText) return [];
@@ -38,6 +39,7 @@ export function renderMusicScore(paperElementId = 'paper') {
         setupAudioController(visualObjs[0]);
     } else {
         refreshWaitModeForNewScore(state.currentVisualObj);
+        setupTimingCoachForScore(state.currentVisualObj);
     }
 
     return currentTuneAbc;
@@ -51,8 +53,11 @@ export function setupAudioController(visualObj) {
     state.synthControl = new ABCJS.synth.SynthController();
 
     const cursorControl = {
-        onStart: () => {},
+        onStart: () => {
+            notifyTimingPlaybackStart();
+        },
         onEvent: (ev) => {
+            notifyTimingPlaybackEvent(ev);
             document.querySelectorAll('.abcjs-note_selected').forEach(el => el.classList.remove('abcjs-note_selected'));
             if (ev && ev.elements) {
                 ev.elements.forEach(noteArray => {
@@ -98,6 +103,7 @@ export function setupAudioController(visualObj) {
             }
         },
         onFinished: () => {
+            notifyTimingPlaybackStop(false);
             document.querySelectorAll('.abcjs-note_selected').forEach(el => el.classList.remove('abcjs-note_selected'));
             clearLitKeys();
         }
@@ -129,6 +135,7 @@ export function setupAudioController(visualObj) {
             e.stopImmediatePropagation();
 
             cancelCountdown();
+            notifyTimingPlaybackStop(true);
 
             if (state.synthControl) {
                 try { state.synthControl.pause(); } catch (err) {}
@@ -163,6 +170,7 @@ export function setupAudioController(visualObj) {
         attachPlayLeadInHook(audioControlsEl);
         initProgressBarScrubber(audioControlsEl);
         refreshWaitModeForNewScore(visualObj);
+        setupTimingCoachForScore(visualObj);
         refreshClockTotal();
     }).catch(err => {
         console.warn('Synth setTune warning:', err);
