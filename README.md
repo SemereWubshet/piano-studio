@@ -10,12 +10,10 @@ A lightweight, local piano practice studio that syncs directly with your local f
 
 ## ✨ Features
 
-- 🎼 **Live ABC Sheet Music Rendering:** Automatically renders multi-tune ABC files into clean, interactive musical scores.
+- 🎼 **Live ABC Sheet Music Rendering:** Automatically renders multi-tune ABC files into clean, interactive musical scores. You can edit ABC code on the fly and save changes straight back to disk with automatic file reloads.
 - 🔊 **Integrated Web Audio Playback:** Synth playback with real-time note highlighting, looping, lead-in countdown, and tempo warp.
-- 🎹 **Interactive Light-Up Piano & USB MIDI Mirror:** A full-width bottom piano tray (C2-C7) with velocity-sensitive acoustic sound synthesis, multiple selectable piano voices (Concert Grand, Warm Upright, Rhodes EP, CP80, Synth Keyboard), toggleable Sustain Pedal, and live USB MIDI hardware mirroring.
-- 🎯 **"Wait-For-Me" Practice Mode:** Interactive sheet follower that pauses on each note or polyphonic chord until you play the exact keys on your USB MIDI keyboard (highlighting target notes in gold, correct notes in emerald, and wrong notes in crimson).
-- 🔴 **Live MIDI-to-ABC Recorder:** Play melodies or chords on your physical MIDI keyboard to transcribe them directly into clean ABC notation with automatic barlines and live sheet music preview.
-- ✏️ **In-Browser ABC Editor:** Slide out a side drawer to edit ABC code on the fly and save changes straight back to disk with automatic file reloads (<kbd>Ctrl</kbd> + <kbd>Enter</kbd>).
+- 🎹 **Interactive Light-Up Piano & USB MIDI Mirror:** A full-width piano tray (C2-C7) with velocity-sensitive acoustic sound synthesis, multiple selectable piano voices (Concert Grand, Warm Upright, Rhodes EP, CP80, Synth Keyboard), toggleable Sustain Pedal, and live USB MIDI hardware mirroring.
+- 🎯 **"Wait-For-Me" Practice Mode:** Interactive sheet follower that pauses on each note or polyphonic chord until you play the exact keys on your USB MIDI keyboard. Notes light up in warm amber guidance with hold-duration tracking (holding green for full note values—including dotted rhythms—before advancing to the next note).
 - 🛑 **Smart Auto-Shutdown:** Tab-close watchdog automatically terminates the background server and frees port 8000 when you are done practicing.
 
 ---
@@ -154,7 +152,7 @@ To suppress the browser security confirmation popup:
 Colors and dimensions are cleanly isolated in [`css/variables.css`](css/variables.css). To adjust the theme (e.g. player colors, seeker bar, highlights), simply edit the variables under `:root`:
 
 ```css
---player-bg: #0f172a;        /* Velvet midnight navy pill */
---seeker-fill-color: #fbbf24;/* Warm luminous gold progress bar */
---accent: #1d4ed8;           /* Royal navy accent */
+--player-bg: #0f172a;        /* Midnight navy pill */
+--seeker-fill-color: #fbbf24;/* Luminous gold progress bar */
+--accent: #1d4ed8;           /* Navy accent */
 ```

@@ -14,6 +14,13 @@ let waitSteps = [];
 let currentStepIndex = 0;
 let satisfiedPitches = new Set();
 let advanceTimer = null;
+let currentStepStartTime = null;
+
+function getActiveSpeedMultiplier() {
+    const warpInput = document.querySelector('.abcjs-midi-tempo');
+    const warpPercent = warpInput ? (parseFloat(warpInput.value) || 100) : 100;
+    return Math.max(0.1, warpPercent / 100);
+}
 
 /**
  * Extracts chronological playable note/chord steps from the active ABCJS visualObj.
@@ -22,13 +29,14 @@ export function buildWaitSteps(visualObj) {
     waitSteps = [];
     currentStepIndex = 0;
     satisfiedPitches.clear();
+    currentStepStartTime = null;
 
     if (!visualObj) return;
 
     let rawTimings = visualObj.noteTimings;
     if ((!rawTimings || rawTimings.length === 0) && window.ABCJS && ABCJS.TimingCallbacks) {
         try {
-            const tc = new ABCJS.TimingCallbacks(visualObj, {});
+            const tc = new ABCJS.TimingCallbacks(visualObj, { eventCallback: () => {} });
             rawTimings = tc.noteTimings;
         } catch (e) {
             console.warn('Could not build TimingCallbacks for Wait Mode:', e);
@@ -37,7 +45,11 @@ export function buildWaitSteps(visualObj) {
 
     if (!rawTimings || rawTimings.length === 0) return;
 
-    rawTimings.forEach(ev => {
+    const baseMsPerMeasure = (visualObj && typeof visualObj.millisecondsPerMeasure === 'function')
+        ? visualObj.millisecondsPerMeasure()
+        : 2000;
+
+    rawTimings.forEach((ev, idx) => {
         if (!ev || !ev.midiPitches || ev.midiPitches.length === 0) return;
 
         const pitches = [];
@@ -51,20 +63,48 @@ export function buildWaitSteps(visualObj) {
         const timeMs = ev.milliseconds ?? 0;
         const lastStep = waitSteps[waitSteps.length - 1];
 
+        // Determine step duration: duration in measures or milliseconds between events
+        let durationFraction = (typeof ev.duration === 'number' && ev.duration > 0) ? ev.duration : null;
+
         // Merge simultaneous multi-voice events (within 15ms) into one combined step
         if (lastStep && Math.abs(lastStep.timeMs - timeMs) <= 15) {
             pitches.forEach(p => lastStep.pitches.add(p));
             if (ev.elements) {
                 ev.elements.forEach(arr => lastStep.elements.push(arr));
             }
+            if (durationFraction && (!lastStep.durationFraction || durationFraction > lastStep.durationFraction)) {
+                lastStep.durationFraction = durationFraction;
+            }
         } else {
             waitSteps.push({
                 timeMs,
                 pitches: new Set(pitches),
-                elements: ev.elements ? [...ev.elements] : []
+                elements: ev.elements ? [...ev.elements] : [],
+                durationFraction: durationFraction,
+                baseMsPerMeasure
             });
         }
     });
+
+    // Populate durationMs for each step
+    for (let i = 0; i < waitSteps.length; i++) {
+        const step = waitSteps[i];
+        const nextStep = waitSteps[i + 1];
+
+        let baseDuration = null;
+        if (typeof step.durationFraction === 'number' && step.durationFraction > 0) {
+            if (step.durationFraction <= 4.0) {
+                baseDuration = step.durationFraction * step.baseMsPerMeasure;
+            } else {
+                baseDuration = step.durationFraction;
+            }
+        } else if (nextStep && typeof nextStep.timeMs === 'number' && nextStep.timeMs > step.timeMs) {
+            baseDuration = nextStep.timeMs - step.timeMs;
+        }
+
+        // Clamp to sensible musical bounds (min 250ms, max 8000ms, default 500ms)
+        step.baseDurationMs = Math.max(250, Math.min(8000, baseDuration || 500));
+    }
 }
 
 function renderCurrentWaitStep() {
@@ -114,7 +154,7 @@ function renderCurrentWaitStep() {
 
 function handleWaitModeNoteOn(midi) {
     if (!state.isWaitMode || waitSteps.length === 0) return;
-    if (advanceTimer) return; // Currently transitioning between steps
+    if (advanceTimer) return; // Currently holding/transitioning between steps
 
     const step = waitSteps[currentStepIndex];
     if (!step) return;
@@ -125,6 +165,10 @@ function handleWaitModeNoteOn(midi) {
 
         // Check if all pitches in the current note/chord have been struck
         if (satisfiedPitches.size >= step.pitches.size) {
+            // Calculate actual hold duration scaled by tempo/speed multiplier
+            const speedMultiplier = getActiveSpeedMultiplier();
+            const holdMs = Math.max(120, (step.baseDurationMs || 500) / speedMultiplier);
+
             advanceTimer = setTimeout(() => {
                 advanceTimer = null;
                 satisfiedPitches.clear();
@@ -135,7 +179,7 @@ function handleWaitModeNoteOn(midi) {
                     currentStepIndex = 0;
                 }
                 renderCurrentWaitStep();
-            }, 70);
+            }, holdMs);
         }
     } else {
         flashWrongMidiKey(midi);
@@ -149,6 +193,7 @@ export function resetWaitModeToStart() {
     }
     currentStepIndex = 0;
     satisfiedPitches.clear();
+    currentStepStartTime = null;
     if (state.isWaitMode) {
         renderCurrentWaitStep();
     }

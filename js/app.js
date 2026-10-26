@@ -210,22 +210,7 @@ class PianoStudioApp {
     }
 
     setupSystemLifecycle() {
-        // Quit button
-        document.getElementById("btn-quit")?.addEventListener("click", () => {
-            sendShutdownSignal();
-            window.close();
-            setTimeout(() => {
-                document.body.innerHTML = `
-                    <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100vh; background:#f8fafc; font-family:sans-serif;">
-                        <h1 style="color:#0f172a; margin-bottom: 8px;">🎹 Studio Offline</h1>
-                        <p style="color:#64748b;">The local server has been cleanly shut down.</p>
-                        <p style="color:#64748b;">You can safely close this tab.</p>
-                    </div>
-                `;
-            }, 150);
-        });
-
-        // Tab unload signal
+        // Tab unload signal (notifies server when tab is closed)
         window.addEventListener("pagehide", () => sendShutdownSignal());
 
         // Audio unlock on user interaction

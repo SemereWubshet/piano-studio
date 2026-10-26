@@ -36,13 +36,16 @@ export function midiToAbcPitch(midi) {
 
 /**
  * Quantizes held duration in milliseconds into an ABC length suffix & beat count.
+ * Supports eighth notes (/), quarter notes, dotted quarter notes (3/2),
+ * half notes (2), dotted half notes (3), and whole notes (4).
  */
 function quantizeDuration(heldMs) {
-    if (heldMs < 300) return { suffix: '/', beats: 0.5 };
-    if (heldMs < 850) return { suffix: '', beats: 1.0 };
-    if (heldMs < 1500) return { suffix: '2', beats: 2.0 };
-    if (heldMs < 2100) return { suffix: '3', beats: 3.0 };
-    return { suffix: '4', beats: 4.0 };
+    if (heldMs < 300) return { suffix: '/', beats: 0.5 };     // Eighth note (0.5 beats)
+    if (heldMs < 680) return { suffix: '', beats: 1.0 };      // Quarter note (1.0 beat)
+    if (heldMs < 1050) return { suffix: '3/2', beats: 1.5 };  // Dotted quarter note (1.5 beats)
+    if (heldMs < 1650) return { suffix: '2', beats: 2.0 };    // Half note (2.0 beats)
+    if (heldMs < 2350) return { suffix: '3', beats: 3.0 };    // Dotted half note (3.0 beats)
+    return { suffix: '4', beats: 4.0 };                       // Whole note (4.0 beats)
 }
 
 function commitCluster(cluster) {

@@ -128,8 +128,7 @@ function updateMidiStatusUI() {
             pillEl.classList.remove('hidden');
             pillEl.style.display = 'inline-flex';
             const primaryName = inputs[0].name || 'MIDI Keyboard';
-            const shortName = primaryName.length > 24 ? primaryName.slice(0, 22) + '…' : primaryName;
-            if (badgeEl) badgeEl.textContent = shortName;
+            if (badgeEl) badgeEl.textContent = primaryName;
             pillEl.title = `Connected: ${primaryName}`;
             if (dotEl) {
                 dotEl.className = `midi-dot connected ${state.isRecordingMidi ? 'recording' : ''}`.trim();
