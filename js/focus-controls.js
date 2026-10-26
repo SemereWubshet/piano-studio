@@ -103,6 +103,17 @@ export function toggleFocusMode(forceState) {
     }
     document.body.classList.toggle('focus-mode', state.isFocusMode);
 
+    // Fullscreen integration: enter fullscreen when opening focus mode, exit when closing
+    if (state.isFocusMode) {
+        if (!document.fullscreenElement && document.documentElement.requestFullscreen) {
+            document.documentElement.requestFullscreen().catch(() => {});
+        }
+    } else {
+        if (document.fullscreenElement && document.exitFullscreen) {
+            document.exitFullscreen().catch(() => {});
+        }
+    }
+
     const focusControls = document.getElementById('focus-controls');
     const audioBar = document.getElementById('audio-bar');
     if (!state.isFocusMode) {
@@ -152,6 +163,14 @@ export function initFocusAndZoomControls() {
     window.addEventListener('mousemove', resetFocusControlsFade);
     window.addEventListener('mousedown', resetFocusControlsFade);
     window.addEventListener('touchstart', resetFocusControlsFade, { passive: true });
+
+    // Sync focus-mode state if user exits fullscreen via browser UI or Esc
+    document.addEventListener('fullscreenchange', () => {
+        if (!document.fullscreenElement && state.isFocusMode) {
+            toggleFocusMode(false);
+            setTimeout(centerSheetMusic, 300);
+        }
+    });
 
     // Ctrl + MouseWheel / Trackpad pinch zoom (smooth controlled scaling)
     document.getElementById('sheet-wrapper')?.addEventListener('wheel', (e) => {

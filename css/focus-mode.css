@@ -143,7 +143,7 @@ body.focus-mode #audio-bar {
 
 /* If piano tray is open in focus mode, float the audio bar nicely above the piano */
 body.focus-mode:has(#piano-dock.open) #audio-bar {
-    bottom: calc(var(--piano-h, 96px) + 12px) !important;
+    bottom: calc(var(--piano-h, 108px) + 12px) !important;
 }
 
 body.focus-mode #audio-bar.faded {
@@ -188,7 +188,6 @@ body.focus-mode .abcjs-midi-loop {
 
 /* Piano Dock in Focus Mode: When open, stays permanently docked and visible */
 body.focus-mode #piano-dock {
-    --piano-h: 96px !important;
     min-height: 70px !important;
     padding: 0 10px 6px !important;
     position: relative !important;

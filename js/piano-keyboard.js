@@ -210,6 +210,7 @@ export function initPianoKeyboard() {
     const dockEl = document.getElementById('piano-dock');
     if (dockEl && savedHeight) {
         dockEl.style.setProperty('--piano-h', `${savedHeight}px`);
+        document.documentElement.style.setProperty('--piano-h', `${savedHeight}px`);
         dockEl.style.height = `${savedHeight}px`;
     }
 
@@ -229,6 +230,7 @@ export function initPianoKeyboard() {
                 const deltaY = startY - moveEvt.clientY;
                 const newHeight = Math.max(90, Math.min(380, startH + deltaY));
                 dockEl.style.setProperty('--piano-h', `${newHeight}px`);
+                document.documentElement.style.setProperty('--piano-h', `${newHeight}px`);
                 dockEl.style.height = `${newHeight}px`;
                 updateBlackKeyPositions();
             };
