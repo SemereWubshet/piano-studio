@@ -87,15 +87,15 @@
                 <div class="top-bar-right">
                     <!-- MIDI Device Pill (only visible while a real MIDI keyboard is connected) -->
                     <div id="midi-status-pill" class="midi-status-pill hidden" style="display: none;">
-                        <span id="midi-status-dot" class="midi-dot connected"></span>
+                        <button id="midi-status-dot" class="midi-dot connected" type="button" aria-label="Record MIDI to ABC score editor" title="Record MIDI"></button>
                         <span id="midi-device-status">MIDI Keyboard</span>
                         <button id="btn-midi-sound" class="midi-sound-btn" title="Mute / unmute browser sound for your keyboard" aria-label="Toggle keyboard sound"></button>
                     </div>
 
-                    <!-- Unified Sound & Sustain Control (Quarter note is the sustain toggle button) -->
+                    <!-- Unified Sound & Sustain Control (Eighth note is the sustain toggle button) -->
                     <div class="sound-sustain-pill" title="Piano Sound & Sustain Settings">
                         <button id="btn-toggle-sustain" class="btn-sustain-icon" type="button" aria-label="Sustain off. Click to toggle sustain" title="Sustain off">
-                            ♩
+                            ♪
                         </button>
                         <button id="btn-piano-voice" class="btn-voice-trigger" type="button" aria-haspopup="listbox" aria-expanded="false" title="Change Piano Tone">
                             <span id="current-voice-label">Concert Grand</span>
@@ -186,18 +186,10 @@
                         <button id="btn-close-editor" class="btn-drawer-close" title="Close score editor" aria-label="Close score editor">›</button>
                     </div>
                     <div class="drawer-actions">
-                        <button id="btn-record-midi" class="btn-record" title="Record live USB MIDI notes & chords straight into ABC notation">
-                            <span class="record-dot"></span>
-                            <span>Record MIDI</span>
-                        </button>
                         <button id="btn-save" class="btn-save-score" title="Save Changes (Ctrl + Enter)">Apply</button>
                     </div>
                     <textarea id="abc-source" spellcheck="false" placeholder="Raw ABC code will load here..."></textarea>
                     <div class="drawer-footer">
-                        <span class="editor-status-valid">
-                            <span class="status-valid-dot"></span>
-                            <span>ABC valid</span>
-                        </span>
                         <span id="editor-cursor-pos" style="font-size: 11.5px; color: var(--text-muted);">Ready</span>
                     </div>
                 </div>

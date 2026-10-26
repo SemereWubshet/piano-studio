@@ -131,7 +131,10 @@ function updateMidiStatusUI() {
             const shortName = primaryName.length > 24 ? primaryName.slice(0, 22) + '…' : primaryName;
             if (badgeEl) badgeEl.textContent = shortName;
             pillEl.title = `Connected: ${primaryName}`;
-            if (dotEl) dotEl.className = 'midi-dot connected';
+            if (dotEl) {
+                dotEl.className = `midi-dot connected ${state.isRecordingMidi ? 'recording' : ''}`.trim();
+                dotEl.title = state.isRecordingMidi ? 'Recording MIDI... Click to stop' : 'Record MIDI';
+            }
         }
     }
 

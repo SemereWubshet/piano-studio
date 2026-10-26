@@ -52,14 +52,14 @@ function animateZoom() {
         return;
     }
 
-    // Smooth lerp (0.12 factor per frame for buttery smooth glide)
-    currentZoom += diff * 0.12;
+    // Smooth lerp (0.08 factor per frame for ultra-gentle, gliding transition)
+    currentZoom += diff * 0.08;
     applyZoom(currentZoom);
     zoomAnimationId = requestAnimationFrame(animateZoom);
 }
 
 function queueSmoothZoom(newTarget) {
-    targetZoom = Math.max(0.4, Math.min(2.5, +newTarget.toFixed(3)));
+    targetZoom = Math.max(0.5, Math.min(2.0, +newTarget.toFixed(3)));
     setZoomLevel(targetZoom);
 
     if (!zoomAnimationId) {
@@ -132,11 +132,11 @@ export function centerSheetMusic() {
 }
 
 export function initFocusAndZoomControls() {
-    // Zoom in / out buttons (buttery smooth steps)
-    document.getElementById('btn-zoom-in')?.addEventListener('click', () => updateZoom(0.10));
-    document.getElementById('btn-zoom-out')?.addEventListener('click', () => updateZoom(-0.10));
-    document.getElementById('btn-focus-zoom-in')?.addEventListener('click', () => updateZoom(0.10));
-    document.getElementById('btn-focus-zoom-out')?.addEventListener('click', () => updateZoom(-0.10));
+    // Zoom in / out buttons (gentle 5% steps for smooth gliding)
+    document.getElementById('btn-zoom-in')?.addEventListener('click', () => updateZoom(0.05));
+    document.getElementById('btn-zoom-out')?.addEventListener('click', () => updateZoom(-0.05));
+    document.getElementById('btn-focus-zoom-in')?.addEventListener('click', () => updateZoom(0.05));
+    document.getElementById('btn-focus-zoom-out')?.addEventListener('click', () => updateZoom(-0.05));
 
     // Focus toggles & toolbar buttons
     document.getElementById('btn-toggle-focus')?.addEventListener('click', () => {
@@ -158,7 +158,7 @@ export function initFocusAndZoomControls() {
         if (e.ctrlKey) {
             e.preventDefault();
             // Scale proportional to scroll intensity with smooth decay and clamp
-            const delta = Math.max(-0.06, Math.min(0.06, -e.deltaY * 0.0008));
+            const delta = Math.max(-0.03, Math.min(0.03, -e.deltaY * 0.0004));
             queueSmoothZoom(targetZoom + delta);
         }
     }, { passive: false });
@@ -193,9 +193,9 @@ export function initFocusAndZoomControls() {
             const loopBtn = document.querySelector('.abcjs-midi-loop');
             if (loopBtn) loopBtn.click();
         } else if (e.key === '+' || e.key === '=') {
-            updateZoom(0.10);
+            updateZoom(0.05);
         } else if (e.key === '-' || e.key === '_') {
-            updateZoom(-0.10);
+            updateZoom(-0.05);
         } else if (e.key === '0') {
             resetZoom();
         }

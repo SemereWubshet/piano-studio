@@ -133,10 +133,11 @@ function handleRecorderNoteOff(midi) {
 export function toggleMidiRecording(forceState) {
     state.isRecordingMidi = (typeof forceState === 'boolean') ? forceState : !state.isRecordingMidi;
 
-    const recBtn = document.getElementById('btn-record-midi');
-    if (recBtn) {
-        recBtn.classList.toggle('recording', state.isRecordingMidi);
-        recBtn.textContent = state.isRecordingMidi ? '⏹ Stop Rec' : '🔴 Record MIDI';
+    const dotBtn = document.getElementById('midi-status-dot');
+    if (dotBtn) {
+        dotBtn.classList.toggle('recording', state.isRecordingMidi);
+        dotBtn.title = state.isRecordingMidi ? 'Recording MIDI... Click to stop' : 'Record MIDI';
+        dotBtn.setAttribute('aria-label', dotBtn.title);
     }
 
     if (state.isRecordingMidi) {
@@ -152,14 +153,19 @@ export function toggleMidiRecording(forceState) {
             commitCluster(currentCluster);
             currentCluster = null;
         }
-        showStudioToast('⏹ MIDI Recording Stopped (Click "Save Changes" to persist to disk)');
+        showStudioToast('⏹ MIDI Recording Stopped (Click "Apply" to update)');
     }
 }
 
 export function initMidiRecorder() {
-    document.getElementById('btn-record-midi')?.addEventListener('click', () => {
-        toggleMidiRecording();
-    });
+    const dotBtn = document.getElementById('midi-status-dot');
+    if (dotBtn) {
+        dotBtn.title = 'Record MIDI';
+        dotBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            toggleMidiRecording();
+        });
+    }
 
     subscribeMidiEvents({
         onNoteOn: handleRecorderNoteOn,
