@@ -35,8 +35,9 @@ export function buildPianoDOM() {
 
         keyboardEl.appendChild(keyEl);
 
-        // Mouse click interaction triggers acoustic synth + dispatches to MIDI bus
-        keyEl.addEventListener('mousedown', (e) => {
+        // Pointer interaction (mouse + touch) triggers acoustic synth + dispatches to MIDI bus
+        keyEl.style.touchAction = 'none';
+        keyEl.addEventListener('pointerdown', (e) => {
             e.preventDefault();
             triggerKeyAnimation(keyEl);
             playAcousticPianoSound(midi, 95);
@@ -49,8 +50,9 @@ export function buildPianoDOM() {
                 dispatchMidiNote(midi, 0, false, 'mouse');
             }
         };
-        keyEl.addEventListener('mouseup', releaseMouseKey);
-        keyEl.addEventListener('mouseleave', releaseMouseKey);
+        keyEl.addEventListener('pointerup', releaseMouseKey);
+        keyEl.addEventListener('pointerleave', releaseMouseKey);
+        keyEl.addEventListener('pointercancel', releaseMouseKey);
     }
 
     updateBlackKeyPositions();

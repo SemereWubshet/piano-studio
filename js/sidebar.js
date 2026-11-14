@@ -15,6 +15,14 @@ let selectTuneCallback = null;
 let activeContextMenuEl = null;
 let activeMenuTriggerRow = null;
 
+const isMobileMode = () =>
+    window.matchMedia('(hover: none) and (pointer: coarse)').matches;
+
+const isCompactMode = () =>
+    window.matchMedia('(max-width: 768px)').matches;
+
+const isOverlayMode = () => isMobileMode() || isCompactMode();
+
 const MORE_ICON_SVG = `<svg width="18" height="18" viewBox="0 0 24 24" fill="#2B2620" aria-hidden="true"><circle cx="5" cy="12" r="1.8"></circle><circle cx="12" cy="12" r="1.8"></circle><circle cx="19" cy="12" r="1.8"></circle></svg>`;
 
 function closeContextMenu() {
@@ -475,6 +483,14 @@ export function renderSidebar(onSelectTune) {
             tuneLi.onclick = (e) => {
                 e.stopPropagation();
                 if (selectTuneCallback) selectTuneCallback(fileName, index);
+                if (isOverlayMode()) {
+                    const sidebarEl = document.getElementById('sidebar');
+                    const expandBtn = document.getElementById('btn-expand-sidebar');
+                    if (sidebarEl && !sidebarEl.classList.contains('collapsed')) {
+                        sidebarEl.classList.add('collapsed');
+                        if (expandBtn) expandBtn.style.display = 'inline-flex';
+                    }
+                }
             };
 
             tuneUl.appendChild(tuneLi);
@@ -505,6 +521,21 @@ export function initSidebarControls(onScoresChanged) {
 
     if (!sidebarEl) return;
 
+    // Auto-collapse sidebar in overlay mode (mobile or compact) so sheet music & player get full width
+    if (isOverlayMode()) {
+        sidebarEl.classList.add("collapsed");
+        if (expandSidebarBtn) expandSidebarBtn.style.display = 'inline-flex';
+    }
+
+    // Click outside sidebar to dismiss in overlay mode
+    document.addEventListener('click', (e) => {
+        if (!isOverlayMode() || sidebarEl.classList.contains('collapsed')) return;
+        if (sidebarEl.contains(e.target) || expandSidebarBtn?.contains(e.target)) return;
+        if (e.target.closest('.sidebar-context-menu, .studio-modal-dialog')) return;
+        sidebarEl.classList.add('collapsed');
+        if (expandSidebarBtn) expandSidebarBtn.style.display = 'inline-flex';
+    });
+
     // Close context menu on outside click or Escape
     document.addEventListener('click', (e) => {
         if (activeContextMenuEl && !activeContextMenuEl.contains(e.target)) {
@@ -520,6 +551,15 @@ export function initSidebarControls(onScoresChanged) {
     const toggleSidebar = () => {
         sidebarEl.style.setProperty('--sidebar-w', `${sidebarEl.offsetWidth}px`);
         const isCollapsed = sidebarEl.classList.toggle("collapsed");
+        if (!isCollapsed && isOverlayMode()) {
+            const drawer = document.getElementById('editor-drawer');
+            const btnEditor = document.getElementById('btn-toggle-editor');
+            if (drawer && drawer.classList.contains('open')) {
+                drawer.classList.remove('open');
+                drawer.classList.add('hidden');
+                if (btnEditor) btnEditor.classList.remove('active');
+            }
+        }
         if (expandSidebarBtn) {
             expandSidebarBtn.style.display = isCollapsed ? 'inline-flex' : 'none';
         }

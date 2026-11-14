@@ -1,4 +1,13 @@
-/* --- Core Layout & Stage --- */
+/* --- Compact Mode Responsive Fixes (<= 768px or touch) --- */
+@media (max-width: 768px), (hover: none) and (pointer: coarse) {
+    #app-container {
+        height: 100dvh;
+    }
+
+    #main-stage {
+        height: 100dvh;
+    }
+}
 #app-container { 
     display: flex; 
     height: 100vh; 

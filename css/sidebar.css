@@ -600,3 +600,28 @@
     font-weight: 400;
     color: #6B6458;
 }
+
+/* --- Mobile-Only Sidebar Overlay & Touch Controls --- */
+@media (hover: none) {
+    .sidebar-more-btn {
+        opacity: 0.7;
+    }
+}
+
+@media (max-width: 768px), (hover: none) and (pointer: coarse) {
+    #sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        z-index: 400;
+        box-shadow: 4px 0 24px rgba(0, 0, 0, 0.18);
+        transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    #sidebar.collapsed {
+        margin-left: 0;
+        transform: translateX(-100%);
+        box-shadow: none;
+    }
+}

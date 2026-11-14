@@ -23,6 +23,27 @@
     margin-right: calc(-1 * var(--drawer-w));
 }
 
+@media (max-width: 768px), (hover: none) and (pointer: coarse) {
+    .editor-drawer {
+        position: fixed;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        width: min(360px, 90vw);
+        min-width: 0;
+        z-index: 400;
+        box-shadow: -4px 0 24px rgba(0, 0, 0, 0.18);
+        transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .editor-drawer.hidden,
+    .editor-drawer:not(.open) {
+        margin-right: 0;
+        transform: translateX(100%);
+        box-shadow: none;
+    }
+}
+
 .drawer-header { 
     display: flex; 
     justify-content: space-between; 

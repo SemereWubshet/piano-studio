@@ -8,6 +8,14 @@ import { state } from './state.js';
 import { saveScoreContent, checkHeartbeat } from './api.js';
 import { parseTunes } from './music-engine.js';
 
+const isMobileMode = () =>
+    window.matchMedia('(hover: none) and (pointer: coarse)').matches;
+
+const isCompactMode = () =>
+    window.matchMedia('(max-width: 768px)').matches;
+
+const isOverlayMode = () => isMobileMode() || isCompactMode();
+
 export function toggleEditor(forceState) {
     const drawer = document.getElementById('editor-drawer');
     const btnToggle = document.getElementById('btn-toggle-editor');
@@ -25,6 +33,15 @@ export function toggleEditor(forceState) {
     } else {
         isOpen = drawer.classList.toggle("open");
         drawer.classList.toggle("hidden", !isOpen);
+    }
+
+    if (isOpen && isOverlayMode()) {
+        const sidebarEl = document.getElementById('sidebar');
+        const expandBtn = document.getElementById('btn-expand-sidebar');
+        if (sidebarEl && !sidebarEl.classList.contains('collapsed')) {
+            sidebarEl.classList.add('collapsed');
+            if (expandBtn) expandBtn.style.display = 'inline-flex';
+        }
     }
 
     if (btnToggle) {
@@ -90,6 +107,13 @@ export function initEditorControls(onSavedCallback) {
     if (btnClose) {
         btnClose.addEventListener('click', () => toggleEditor(false));
     }
+
+    // Click outside editor drawer to dismiss in overlay mode
+    document.addEventListener('click', (e) => {
+        if (!isOverlayMode() || !drawer || !drawer.classList.contains('open')) return;
+        if (drawer.contains(e.target) || btnToggle?.contains(e.target)) return;
+        toggleEditor(false);
+    });
 
     if (btnSave) {
         btnSave.addEventListener('click', () => saveCurrentTune(onSavedCallback));
