@@ -35,8 +35,8 @@ export function initOwnerAndGuestControls(onScoresChanged) {
 
     const ownerBadge = document.createElement('button');
     ownerBadge.id = 'btn-owner-lock';
-    ownerBadge.title = 'Owner Mode active — click to lock';
-    ownerBadge.textContent = '● Owner';
+    ownerBadge.title = 'Admin Mode active — click to lock';
+    ownerBadge.textContent = '● Admin';
     ownerBadge.style.cssText =
         'display:none;font-size:11px;padding:2px 7px;border-radius:999px;border:1px solid #2e7d32;background:#e8f5e9;color:#1b5e20;cursor:pointer;font-weight:600;';
 
@@ -308,7 +308,7 @@ export function initOwnerAndGuestControls(onScoresChanged) {
     dialog.className = 'studio-modal-dialog';
     dialog.innerHTML = `
         <form method="dialog" id="owner-unlock-form" class="dialog-form">
-            <h2>Owner Access</h2>
+            <h2>Admin Access</h2>
             <p>Enter your passphrase to unlock your private scores.</p>
             <label for="owner-passphrase-input">Passphrase</label>
             <input id="owner-passphrase-input" type="password" autocomplete="current-password"

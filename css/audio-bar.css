@@ -45,7 +45,7 @@
     order: -2 !important;
     display: inline-flex !important;
     align-items: center !important;
-    gap: 6px !important;
+    gap: 3px !important;
     height: 40px !important;
     padding: 0 12px !important;
     border-radius: 12px !important;
@@ -59,13 +59,14 @@
 }
 
 .bpm-pill .bpm-note {
-    font-size: 30px !important;
+    font-size: 40px !important;
     line-height: 1 !important;
     display: inline-flex !important;
     align-items: center !important;
     transform: translateY(-1px);
+    margin-right: 2px !important;
     font-weight: 500 !important;
-    color: #6b665a !important;
+    color: black !important;
 }
 
 .bpm-pill .bpm-eq {

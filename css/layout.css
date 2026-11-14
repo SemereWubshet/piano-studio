@@ -104,6 +104,17 @@
     transform: translateX(18px);
 }
 
+@media (hover: none) and (pointer: coarse) and (orientation: landscape) {
+    #top-bar .shortcut-tag {
+        display: none;
+    }
+
+    #top-bar .btn {
+        box-sizing: border-box;
+        overflow: hidden;
+    }
+}
+
 @media (max-width: 768px) {
     #top-bar {
         padding: 0 10px;
