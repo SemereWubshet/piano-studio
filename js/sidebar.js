@@ -442,7 +442,8 @@ export function renderSidebar(onSelectTune) {
 
         header.append(nameSpan, moreBtn);
 
-        header.onclick = () => {
+        header.onclick = (e) => {
+            e.stopPropagation();
             toggleExpandedFile(fileName);
             renderSidebar(selectTuneCallback);
         };
@@ -484,12 +485,7 @@ export function renderSidebar(onSelectTune) {
                 e.stopPropagation();
                 if (selectTuneCallback) selectTuneCallback(fileName, index);
                 if (isOverlayMode()) {
-                    const sidebarEl = document.getElementById('sidebar');
-                    const expandBtn = document.getElementById('btn-expand-sidebar');
-                    if (sidebarEl && !sidebarEl.classList.contains('collapsed')) {
-                        sidebarEl.classList.add('collapsed');
-                        if (expandBtn) expandBtn.style.display = 'inline-flex';
-                    }
+                    document.getElementById('sidebar')?.classList.remove('mobile-open');
                 }
             };
 
@@ -521,19 +517,155 @@ export function initSidebarControls(onScoresChanged) {
 
     if (!sidebarEl) return;
 
-    // Auto-collapse sidebar in overlay mode (mobile or compact) so sheet music & player get full width
-    if (isOverlayMode()) {
-        sidebarEl.classList.add("collapsed");
-        if (expandSidebarBtn) expandSidebarBtn.style.display = 'inline-flex';
+    // Move shortcutsDialog to body so sidebar transform doesn't trap or hide it
+    if (shortcutsDialog && shortcutsDialog.parentElement !== document.body) {
+        document.body.appendChild(shortcutsDialog);
+    }
+
+    // Portrait Top-Bar Vertical "⋮" More Button & Android-style Dropdown Menu
+    const VERTICAL_MORE_SVG = `<svg width="20" height="20" viewBox="0 0 24 24" fill="#2B2620" aria-hidden="true"><circle cx="12" cy="5" r="1.8"></circle><circle cx="12" cy="12" r="1.8"></circle><circle cx="12" cy="19" r="1.8"></circle></svg>`;
+    const topBarRight = document.querySelector('.top-bar-right');
+    if (topBarRight && !document.getElementById('btn-mobile-more')) {
+        const moreBtn = document.createElement('button');
+        moreBtn.id = 'btn-mobile-more';
+        moreBtn.type = 'button';
+        moreBtn.setAttribute('aria-label', 'More options');
+        moreBtn.title = 'More options';
+        moreBtn.innerHTML = VERTICAL_MORE_SVG;
+        topBarRight.appendChild(moreBtn);
+
+        let activeMobileMenu = null;
+        const closeSheet = () => {
+            if (activeMobileMenu) {
+                activeMobileMenu.remove();
+                activeMobileMenu = null;
+            }
+        };
+
+        document.addEventListener('click', (ev) => {
+            if (activeMobileMenu && !activeMobileMenu.contains(ev.target) && !moreBtn.contains(ev.target)) {
+                closeSheet();
+            }
+        });
+
+        moreBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (activeMobileMenu) {
+                closeSheet();
+                return;
+            }
+
+            const sheet = document.createElement('div');
+            sheet.className = 'mobile-options-menu';
+
+            const voiceLabelEl = document.getElementById('current-voice-label');
+            const selectVoiceEl = document.getElementById('select-piano-voice');
+            const sustainBtn = document.getElementById('btn-toggle-sustain');
+            const keysBtn = document.getElementById('btn-toggle-keyboard');
+            const focusBtn = document.getElementById('btn-toggle-focus');
+            const editorBtn = document.getElementById('btn-toggle-editor');
+
+            const isKeysActive = keysBtn?.classList.contains('active');
+            const isSustainActive = sustainBtn?.classList.contains('active');
+
+            sheet.innerHTML = `
+                <button type="button" class="sheet-row" id="sheet-row-instrument">
+                    <span>Instrument</span>
+                    <span id="sheet-instrument-val" style="color:#6B6458">${voiceLabelEl?.textContent || 'Concert Grand'} ▾</span>
+                </button>
+                <div id="sheet-instrument-list" style="display:none;flex-direction:column;padding:4px 0 8px 12px;gap:2px;"></div>
+                <hr>
+                <button type="button" class="sheet-row" id="sheet-row-sustain">
+                    <span>Sustain</span>
+                    <span class="sheet-toggle-pill ${isSustainActive ? 'on' : ''}" id="sheet-sustain-pill"></span>
+                </button>
+                <hr>
+                <button type="button" class="sheet-row" id="sheet-row-keys">
+                    <span>Keys</span>
+                    <span class="sheet-toggle-pill ${isKeysActive ? 'on' : ''}" id="sheet-keys-pill"></span>
+                </button>
+                <hr>
+                <button type="button" class="sheet-row" id="sheet-row-focus">
+                    <span>Focus mode</span>
+                </button>
+                <hr>
+                <button type="button" class="sheet-row" id="sheet-row-editor">
+                    <span>Score editor</span>
+                </button>
+                <hr>
+                <button type="button" class="sheet-row" id="sheet-row-shortcuts">
+                    <span>Shortcuts</span>
+                </button>
+            `;
+
+            const instListEl = sheet.querySelector('#sheet-instrument-list');
+            const renderInstrumentOptions = () => {
+                if (!selectVoiceEl || !instListEl) return;
+                instListEl.innerHTML = '';
+                Array.from(selectVoiceEl.options).forEach((opt, idx) => {
+                    const isSelected = idx === selectVoiceEl.selectedIndex;
+                    const optBtn = document.createElement('button');
+                    optBtn.type = 'button';
+                    optBtn.style.cssText =
+                        `display:flex;justify-content:space-between;align-items:center;height:40px;padding:0 10px;border:0;border-radius:8px;background:${isSelected ? '#F5F1E6' : 'transparent'};font:inherit;font-size:14px;font-weight:${isSelected ? '600' : '400'};color:#2B2620;cursor:pointer;text-align:left;`;
+                    optBtn.innerHTML = `<span>${opt.text}</span><span>${isSelected ? '✓' : ''}</span>`;
+                    optBtn.addEventListener('click', () => {
+                        selectVoiceEl.selectedIndex = idx;
+                        selectVoiceEl.dispatchEvent(new Event('change'));
+                        sheet.querySelector('#sheet-instrument-val').textContent = `${opt.text} ▾`;
+                        instListEl.style.display = 'none';
+                    });
+                    instListEl.appendChild(optBtn);
+                });
+            };
+
+            sheet.querySelector('#sheet-row-instrument').addEventListener('click', () => {
+                const isOpen = instListEl.style.display === 'flex';
+                if (isOpen) {
+                    instListEl.style.display = 'none';
+                } else {
+                    renderInstrumentOptions();
+                    instListEl.style.display = 'flex';
+                }
+            });
+
+            sheet.querySelector('#sheet-row-sustain').addEventListener('click', () => {
+                sustainBtn?.click();
+                sheet.querySelector('#sheet-sustain-pill').classList.toggle('on', Boolean(sustainBtn?.classList.contains('active')));
+            });
+
+            sheet.querySelector('#sheet-row-keys').addEventListener('click', () => {
+                keysBtn?.click();
+                sheet.querySelector('#sheet-keys-pill').classList.toggle('on', Boolean(keysBtn?.classList.contains('active')));
+            });
+
+            sheet.querySelector('#sheet-row-focus').addEventListener('click', () => {
+                closeSheet();
+                focusBtn?.click();
+            });
+
+            sheet.querySelector('#sheet-row-editor').addEventListener('click', () => {
+                closeSheet();
+                editorBtn?.click();
+            });
+
+            sheet.querySelector('#sheet-row-shortcuts').addEventListener('click', (ev) => {
+                ev.stopPropagation();
+                closeSheet();
+                shortcutsDialog?.classList.remove('hidden');
+            });
+
+            document.body.appendChild(sheet);
+            activeMobileMenu = sheet;
+        });
     }
 
     // Click outside sidebar to dismiss in overlay mode
     document.addEventListener('click', (e) => {
-        if (!isOverlayMode() || sidebarEl.classList.contains('collapsed')) return;
+        if (!isOverlayMode() || !sidebarEl.classList.contains('mobile-open')) return;
         if (sidebarEl.contains(e.target) || expandSidebarBtn?.contains(e.target)) return;
         if (e.target.closest('.sidebar-context-menu, .studio-modal-dialog')) return;
-        sidebarEl.classList.add('collapsed');
-        if (expandSidebarBtn) expandSidebarBtn.style.display = 'inline-flex';
+        sidebarEl.classList.remove('mobile-open');
     });
 
     // Close context menu on outside click or Escape
@@ -549,17 +681,21 @@ export function initSidebarControls(onScoresChanged) {
     });
 
     const toggleSidebar = () => {
+        if (isOverlayMode()) {
+            const isOpen = sidebarEl.classList.toggle("mobile-open");
+            if (isOpen) {
+                const drawer = document.getElementById('editor-drawer');
+                const btnEditor = document.getElementById('btn-toggle-editor');
+                if (drawer && drawer.classList.contains('open')) {
+                    drawer.classList.remove('open');
+                    drawer.classList.add('hidden');
+                    if (btnEditor) btnEditor.classList.remove('active');
+                }
+            }
+            return;
+        }
         sidebarEl.style.setProperty('--sidebar-w', `${sidebarEl.offsetWidth}px`);
         const isCollapsed = sidebarEl.classList.toggle("collapsed");
-        if (!isCollapsed && isOverlayMode()) {
-            const drawer = document.getElementById('editor-drawer');
-            const btnEditor = document.getElementById('btn-toggle-editor');
-            if (drawer && drawer.classList.contains('open')) {
-                drawer.classList.remove('open');
-                drawer.classList.add('hidden');
-                if (btnEditor) btnEditor.classList.remove('active');
-            }
-        }
         if (expandSidebarBtn) {
             expandSidebarBtn.style.display = isCollapsed ? 'inline-flex' : 'none';
         }

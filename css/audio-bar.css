@@ -189,6 +189,7 @@
 /* 4. Repeat Button Attached to Top-Right of Play Button (⟲ matching Main.dc.html) */
 .abcjs-midi-loop {
     order: 2 !important;
+    opacity: 1 !important;
     width: 28px !important;
     height: 28px !important;
     min-width: 28px !important;
@@ -381,4 +382,68 @@
     border-radius: 3px 0 0 3px;
     pointer-events: none !important;
     z-index: -1;
+}
+
+/* --- Compact / Portrait Audio Bar (Seeker on Top Edge, Pure CSS) --- */
+@media (max-width: 768px) {
+    #audio-bar {
+        position: relative;
+        justify-content: space-between;
+        padding: 4px 12px 0;
+        gap: 6px;
+    }
+
+    .abcjs-midi-clock {
+        display: none !important;
+    }
+
+    .abcjs-midi-progress-background {
+        position: absolute !important;
+        left: 16px !important;
+        right: 16px !important;
+        top: 0 !important;
+        height: 4px !important;
+        min-width: 0 !important;
+        border-radius: 3px !important;
+    }
+
+    .abcjs-midi-progress-indicator {
+        width: 10px !important;
+        height: 10px !important;
+    }
+
+    .abcjs-midi-loop {
+        width: 38px !important;
+        height: 38px !important;
+        min-width: 38px !important;
+        border-radius: 12px !important;
+        margin: 0 !important;
+        box-shadow: none !important;
+        background: #f4f1ea !important;
+        opacity: 1 !important;
+    }
+
+    .abcjs-midi-loop::before {
+        font-size: 18px !important;
+        color: #1d1b17 !important;
+    }
+}
+
+@media (max-width: 768px) {
+    #audio-bar {
+        margin: 6px 10px 12px;
+        height: 62px;
+        border-radius: 20px;
+        min-width: 330px;
+    }
+
+    .bpm-pill {
+        padding: 0 8px !important;
+        height: 38px !important;
+    }
+
+    .lead-in-control {
+        padding: 0 4px 0 7px !important;
+        height: 38px !important;
+    }
 }

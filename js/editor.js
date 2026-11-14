@@ -36,12 +36,7 @@ export function toggleEditor(forceState) {
     }
 
     if (isOpen && isOverlayMode()) {
-        const sidebarEl = document.getElementById('sidebar');
-        const expandBtn = document.getElementById('btn-expand-sidebar');
-        if (sidebarEl && !sidebarEl.classList.contains('collapsed')) {
-            sidebarEl.classList.add('collapsed');
-            if (expandBtn) expandBtn.style.display = 'inline-flex';
-        }
+        document.getElementById('sidebar')?.classList.remove('mobile-open');
     }
 
     if (btnToggle) {

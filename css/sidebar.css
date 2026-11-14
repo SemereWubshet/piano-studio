@@ -209,19 +209,23 @@
     color: var(--text-muted);
 }
 
-/* Floating Shortcuts Dialog (Stays within sidebar, in front of stage & piano) */
+#btn-shortcuts {
+    display: none !important;
+}
+
+/* Floating Shortcuts Dialog */
 .shortcuts-dialog {
-    position: absolute;
-    bottom: 50px;
-    left: 12px;
-    width: calc(100% - 24px);
-    max-width: 250px;
-    padding: 14px;
+    position: fixed;
+    inset: 0;
+    margin: auto;
+    width: 260px;
+    height: fit-content;
+    padding: 16px;
     border-radius: 14px;
     background: #ffffff;
     border: 1px solid var(--border-color);
-    box-shadow: 0 14px 40px rgba(59, 47, 26, 0.20);
-    z-index: 500;
+    box-shadow: 0 14px 40px rgba(59, 47, 26, 0.22);
+    z-index: 1300;
     display: flex;
     flex-direction: column;
     gap: 8px;
@@ -615,13 +619,14 @@
         left: 0;
         bottom: 0;
         z-index: 400;
-        box-shadow: 4px 0 24px rgba(0, 0, 0, 0.18);
-        transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-
-    #sidebar.collapsed {
-        margin-left: 0;
+        margin-left: 0 !important;
         transform: translateX(-100%);
         box-shadow: none;
+        transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    #sidebar.mobile-open {
+        transform: translateX(0);
+        box-shadow: 4px 0 24px rgba(0, 0, 0, 0.18);
     }
 }

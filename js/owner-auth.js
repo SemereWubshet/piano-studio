@@ -267,7 +267,19 @@ export function initOwnerAndGuestControls(onScoresChanged) {
             closeBackupMenu();
             openImportModal();
         });
-        menu.append(newFileBtn, exportAllBtn, chooseExportBtn, div, importItemBtn);
+
+        const div2 = document.createElement('div');
+        div2.className = 'menu-divider';
+        const shortcutsItemBtn = document.createElement('button');
+        shortcutsItemBtn.type = 'button';
+        shortcutsItemBtn.textContent = 'Keyboard shortcuts';
+        shortcutsItemBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            closeBackupMenu();
+            document.getElementById('shortcuts-dialog')?.classList.toggle('hidden');
+        });
+
+        menu.append(newFileBtn, exportAllBtn, chooseExportBtn, div, importItemBtn, div2, shortcutsItemBtn);
 
         document.body.appendChild(menu);
         activeMenu = menu;
@@ -289,26 +301,25 @@ export function initOwnerAndGuestControls(onScoresChanged) {
         ownerBadge.style.display = isOwner ? 'inline-block' : 'none';
     }
 
-    // Owner Mode (online only)
-    if (!isLocal) {
-        const dialog = document.createElement('dialog');
-        dialog.id = 'owner-unlock-dialog';
-        dialog.className = 'studio-modal-dialog';
-        dialog.innerHTML = `
-            <form method="dialog" id="owner-unlock-form" class="dialog-form">
-                <h2>Owner Access</h2>
-                <p>Enter your passphrase to unlock your private scores.</p>
-                <label for="owner-passphrase-input">Passphrase</label>
-                <input id="owner-passphrase-input" type="password" autocomplete="current-password"
-                    placeholder="Enter passphrase" required>
-                <div id="owner-unlock-error" style="color:#B3261E;font-size:13px;display:none;"></div>
-                <div class="dialog-actions">
-                    <button type="button" id="owner-unlock-cancel" class="btn-cancel">Cancel</button>
-                    <button type="submit" class="btn-primary">Unlock</button>
-                </div>
-            </form>
-        `;
-        document.body.appendChild(dialog);
+    // Owner Mode Unlock Dialog & Secret Knock (Ctrl+Shift+O on desktop, triple-tap "Piano Studio" or score title on mobile)
+    const dialog = document.createElement('dialog');
+    dialog.id = 'owner-unlock-dialog';
+    dialog.className = 'studio-modal-dialog';
+    dialog.innerHTML = `
+        <form method="dialog" id="owner-unlock-form" class="dialog-form">
+            <h2>Owner Access</h2>
+            <p>Enter your passphrase to unlock your private scores.</p>
+            <label for="owner-passphrase-input">Passphrase</label>
+            <input id="owner-passphrase-input" type="password" autocomplete="current-password"
+                placeholder="Enter passphrase" required>
+            <div id="owner-unlock-error" style="color:#B3261E;font-size:13px;display:none;"></div>
+            <div class="dialog-actions">
+                <button type="button" id="owner-unlock-cancel" class="btn-cancel">Cancel</button>
+                <button type="submit" class="btn-primary">Unlock</button>
+            </div>
+        </form>
+    `;
+    document.body.appendChild(dialog);
 
     const form = dialog.querySelector('#owner-unlock-form');
     const passInput = dialog.querySelector('#owner-passphrase-input');
@@ -339,7 +350,7 @@ export function initOwnerAndGuestControls(onScoresChanged) {
         }
     });
 
-    // Desktop Secret Knock: Ctrl + Shift + O (avoids 'P' which triggers Play/Pause)
+    // Desktop Secret Knock: Ctrl + Shift + O
     window.addEventListener('keydown', (e) => {
         if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 'o') {
             e.preventDefault();
@@ -347,29 +358,33 @@ export function initOwnerAndGuestControls(onScoresChanged) {
         }
     });
 
-    // Mobile Secret Knock: Triple-tap on "Piano Studio" title
-    let tapCount = 0;
-    let tapTimer = null;
-    titleEl.addEventListener('click', () => {
-        tapCount += 1;
-        clearTimeout(tapTimer);
-        if (tapCount >= 3) {
-            tapCount = 0;
-            openUnlockDialog();
-        } else {
-            tapTimer = setTimeout(() => {
+    // Mobile Secret Knock: Triple-tap on "Piano Studio" sidebar title OR top-bar score title
+    const bindTripleTap = (el) => {
+        if (!el) return;
+        let tapCount = 0;
+        let tapTimer = null;
+        el.addEventListener('click', () => {
+            tapCount += 1;
+            clearTimeout(tapTimer);
+            if (tapCount >= 3) {
                 tapCount = 0;
-            }, 600);
-        }
-    });
-
-        // Lock button
-        ownerBadge.addEventListener('click', async () => {
-            await lockOwner();
-            refreshControlsVisibility();
-            if (onScoresChanged) await onScoresChanged();
+                openUnlockDialog();
+            } else {
+                tapTimer = setTimeout(() => {
+                    tapCount = 0;
+                }, 600);
+            }
         });
-    }
+    };
+    bindTripleTap(titleEl);
+    bindTripleTap(document.getElementById('active-score-title'));
+
+    // Lock button
+    ownerBadge.addEventListener('click', async () => {
+        await lockOwner();
+        refreshControlsVisibility();
+        if (onScoresChanged) await onScoresChanged();
+    });
 
     refreshControlsVisibility();
     return { refreshControlsVisibility };
