@@ -1,0 +1,13 @@
+{
+  "version": 2,
+  "rewrites": [
+    {
+      "source": "/scores/sample.abc",
+      "destination": "/scores/sample.abc"
+    },
+    {
+      "source": "/scores/:path*",
+      "destination": "/api/scores?blocked=1"
+    }
+  ]
+}

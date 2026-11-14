@@ -18,6 +18,7 @@ import { initTimingCoach } from './timing-coach.js';
 import { initMidiShortcuts } from './midi-shortcuts.js';
 import { initMidiRecorder } from './midi-recorder.js';
 import { getCurrentVoiceId, setPianoVoice, getIsSustainEnabled, toggleSustainPedal } from './piano-synth.js';
+import { initOwnerAndGuestControls } from './owner-auth.js';
 
 const STORAGE_LAST_SCORE_KEY = 'piano_studio_last_score_file';
 const STORAGE_LAST_TUNE_KEY = 'piano_studio_last_tune_index';
@@ -38,7 +39,9 @@ class PianoStudioApp {
         initMidiRecorder();
         initMidiEngine();
 
+        const ownerControls = initOwnerAndGuestControls(() => this.loadAllScores());
         await this.loadAllScores();
+        ownerControls?.refreshControlsVisibility();
         startHeartbeatMonitor(() => this.loadAllScores());
         checkHeartbeat(); // Cancel immediate shutdown timer
     }
