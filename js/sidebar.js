@@ -522,8 +522,8 @@ export function initSidebarControls(onScoresChanged) {
         document.body.appendChild(shortcutsDialog);
     }
 
-    // Portrait Top-Bar Vertical "⋮" More Button & Android-style Dropdown Menu
-    const VERTICAL_MORE_SVG = `<svg width="20" height="20" viewBox="0 0 24 24" fill="#2B2620" aria-hidden="true"><circle cx="12" cy="5" r="1.8"></circle><circle cx="12" cy="12" r="1.8"></circle><circle cx="12" cy="19" r="1.8"></circle></svg>`;
+    // Portrait Top-Bar Sliders ("Tune/Adjust") Button & Dropdown Menu
+    const SLIDERS_ICON_SVG = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2B2620" stroke-width="1.9" stroke-linecap="round" aria-hidden="true"><line x1="4" y1="6" x2="20" y2="6"/><circle cx="9" cy="6" r="2" fill="#2B2620"/><line x1="4" y1="12" x2="20" y2="12"/><circle cx="15" cy="12" r="2" fill="#2B2620"/><line x1="4" y1="18" x2="20" y2="18"/><circle cx="10" cy="18" r="2" fill="#2B2620"/></svg>`;
     const topBarRight = document.querySelector('.top-bar-right');
     if (topBarRight && !document.getElementById('btn-mobile-more')) {
         const moreBtn = document.createElement('button');
@@ -531,7 +531,7 @@ export function initSidebarControls(onScoresChanged) {
         moreBtn.type = 'button';
         moreBtn.setAttribute('aria-label', 'More options');
         moreBtn.title = 'More options';
-        moreBtn.innerHTML = VERTICAL_MORE_SVG;
+        moreBtn.innerHTML = SLIDERS_ICON_SVG;
         topBarRight.appendChild(moreBtn);
 
         let activeMobileMenu = null;
@@ -644,7 +644,8 @@ export function initSidebarControls(onScoresChanged) {
                 focusBtn?.click();
             });
 
-            sheet.querySelector('#sheet-row-editor').addEventListener('click', () => {
+            sheet.querySelector('#sheet-row-editor').addEventListener('click', (ev) => {
+                ev.stopPropagation();
                 closeSheet();
                 editorBtn?.click();
             });

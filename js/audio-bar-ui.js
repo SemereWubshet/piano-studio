@@ -44,7 +44,7 @@ function buildBpmPill(inline, visualObj) {
     const pill = document.createElement('label');
     pill.className = 'bpm-pill';
     pill.title = 'Tempo';
-    pill.innerHTML = `<span class="bpm-note">♩ =</span><input type="number" min="10" max="400" step="1" aria-label="Tempo in BPM">`;
+    pill.innerHTML = `<span class="bpm-note">♩</span><span class="bpm-eq">=</span><input type="number" min="10" max="400" step="1" aria-label="Tempo in BPM">`;
     const bpmInput = pill.querySelector('input');
 
     const syncFromWarp = () => {

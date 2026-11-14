@@ -2,7 +2,7 @@
 @media (max-width: 768px), (hover: none) and (pointer: coarse) {
     #app-container {
         height: 100dvh;
-        min-width: 360px;
+        min-width: 300px;
     }
 
     #main-stage {

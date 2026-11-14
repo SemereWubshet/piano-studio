@@ -301,8 +301,9 @@ export function initOwnerAndGuestControls(onScoresChanged) {
         ownerBadge.style.display = isOwner ? 'inline-block' : 'none';
     }
 
-    // Owner Mode Unlock Dialog & Secret Knock (Ctrl+Shift+O on desktop, triple-tap "Piano Studio" or score title on mobile)
-    const dialog = document.createElement('dialog');
+    // Owner Mode Unlock Dialog & Secret Knock (online only)
+    if (!isLocal) {
+        const dialog = document.createElement('dialog');
     dialog.id = 'owner-unlock-dialog';
     dialog.className = 'studio-modal-dialog';
     dialog.innerHTML = `
@@ -379,12 +380,13 @@ export function initOwnerAndGuestControls(onScoresChanged) {
     bindTripleTap(titleEl);
     bindTripleTap(document.getElementById('active-score-title'));
 
-    // Lock button
-    ownerBadge.addEventListener('click', async () => {
-        await lockOwner();
-        refreshControlsVisibility();
-        if (onScoresChanged) await onScoresChanged();
-    });
+        // Lock button
+        ownerBadge.addEventListener('click', async () => {
+            await lockOwner();
+            refreshControlsVisibility();
+            if (onScoresChanged) await onScoresChanged();
+        });
+    }
 
     refreshControlsVisibility();
     return { refreshControlsVisibility };
