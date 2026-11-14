@@ -167,17 +167,16 @@
 
             <!-- Sheet & Editor Body Stage -->
             <div id="workspace-body">
+                <!-- Subtle Floating Zoom Control in Top-Right of Sheet Stage -->
+                <div class="sheet-zoom-overlay">
+                    <div class="zoom-pill">
+                        <button id="btn-zoom-out" class="zoom-btn" title="Zoom Out (-)" aria-label="Zoom out">−</button>
+                        <span id="zoom-level-text" class="zoom-text">100%</span>
+                        <button id="btn-zoom-in" class="zoom-btn" title="Zoom In (+)" aria-label="Zoom in">+</button>
+                    </div>
+                </div>
                 
                 <div id="sheet-wrapper">
-                    <!-- Subtle Floating Zoom Control in Top-Right of Sheet Card -->
-                    <div class="sheet-zoom-overlay">
-                        <div class="zoom-pill">
-                            <button id="btn-zoom-out" class="zoom-btn" title="Zoom Out (-)" aria-label="Zoom out">−</button>
-                            <span id="zoom-level-text" class="zoom-text">100%</span>
-                            <button id="btn-zoom-in" class="zoom-btn" title="Zoom In (+)" aria-label="Zoom in">+</button>
-                        </div>
-                    </div>
-
                     <div id="paper-stage">
                         <div id="paper"></div>
                     </div> 

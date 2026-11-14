@@ -10,6 +10,7 @@ import { lightUpKeys, clearLitKeys } from './piano-keyboard.js';
 import { refreshWaitModeForNewScore, resetWaitModeToStart, toggleWaitMode } from './wait-mode.js';
 import { decorateAudioBar, refreshClockTotal, initProgressBarScrubber } from './audio-bar-ui.js';
 import { setupTimingCoachForScore, notifyTimingPlaybackStart, notifyTimingPlaybackEvent, notifyTimingPlaybackStop } from './timing-coach.js';
+import { syncSheetZoom } from './focus-controls.js';
 
 export function parseTunes(abcText) {
     if (!abcText) return [];
@@ -43,6 +44,8 @@ export function renderMusicScore(paperElementId = 'paper') {
         add_classes: true,
         staffwidth: 760
     });
+
+    syncSheetZoom();
 
     state.currentVisualObj = visualObjs[0] || null;
 

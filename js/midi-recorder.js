@@ -10,6 +10,7 @@ import { state } from './state.js';
 import { subscribeMidiEvents, showStudioToast } from './midi-engine.js';
 import { toggleEditor } from './editor.js';
 import { togglePianoTray } from './piano-keyboard.js';
+import { syncSheetZoom } from './focus-controls.js';
 
 const UPPER_NAMES = ['C', '^C', 'D', '^D', 'E', 'F', '^F', 'G', '^G', 'A', '^A', 'B'];
 const LOWER_NAMES = ['c', '^c', 'd', '^d', 'e', 'f', '^f', 'g', '^g', 'a', '^a', 'b'];
@@ -96,6 +97,7 @@ function appendAbcToken(token, beats) {
             add_classes: true,
             staffwidth: 760
         });
+        syncSheetZoom();
     }
 }
 

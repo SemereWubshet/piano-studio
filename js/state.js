@@ -31,7 +31,7 @@ export function setActiveFile(fileName, tuneIndex = 0) {
 }
 
 export function setZoomLevel(level) {
-    state.zoomLevel = Math.max(0.4, Math.min(2.5, +level.toFixed(2)));
+    state.zoomLevel = Math.max(0.5, Math.min(2.0, +level.toFixed(3)));
     return state.zoomLevel;
 }
 

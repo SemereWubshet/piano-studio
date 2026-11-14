@@ -10,56 +10,123 @@ import { state, setZoomLevel } from './state.js';
 let targetZoom = state.zoomLevel;
 let currentZoom = state.zoomLevel;
 let zoomAnimationId = null;
+let anchorState = null;
 
-function applyZoom(zoom) {
+function getStageBaseWidth(wrapperEl) {
+    if (!wrapperEl) return 820;
+    const cs = window.getComputedStyle(wrapperEl);
+    const padX = (parseFloat(cs.paddingLeft) || 0) + (parseFloat(cs.paddingRight) || 0);
+    return Math.max(280, (wrapperEl.clientWidth || 880) - padX);
+}
+
+function captureScrollAnchor(focalPoint = null) {
+    const wrapperEl = document.getElementById('sheet-wrapper');
+    if (!wrapperEl) return;
+
+    let focalX = wrapperEl.clientWidth / 2;
+    let focalY = wrapperEl.scrollTop > 10 ? wrapperEl.clientHeight / 2 : 0;
+
+    if (focalPoint && typeof focalPoint.clientX === 'number') {
+        const rect = wrapperEl.getBoundingClientRect();
+        focalX = Math.max(0, Math.min(wrapperEl.clientWidth, focalPoint.clientX - rect.left));
+        focalY = Math.max(0, Math.min(wrapperEl.clientHeight, focalPoint.clientY - rect.top));
+    }
+
+    const canScrollX = currentZoom > 1.001 && wrapperEl.scrollWidth > wrapperEl.clientWidth;
+    const uX = canScrollX
+        ? (wrapperEl.scrollLeft + focalX) / Math.max(1, wrapperEl.scrollWidth)
+        : (focalPoint ? focalX / Math.max(1, wrapperEl.clientWidth) : 0.5);
+
+    const canScrollY = (wrapperEl.scrollTop > 10 || focalPoint) && wrapperEl.scrollHeight > wrapperEl.clientHeight;
+    const uY = canScrollY
+        ? (wrapperEl.scrollTop + focalY) / Math.max(1, wrapperEl.scrollHeight)
+        : 0;
+
+    anchorState = {
+        focalX,
+        focalY,
+        uX,
+        uY,
+        clientX: focalPoint?.clientX ?? null,
+        clientY: focalPoint?.clientY ?? null
+    };
+}
+
+function applyZoom(zoom, options = {}) {
+    const wrapperEl = document.getElementById('sheet-wrapper');
     const paperEl = document.getElementById('paper');
     const stageEl = document.getElementById('paper-stage');
     const roundedZoom = Math.round(zoom * 1000) / 1000;
 
+    if (stageEl) {
+        stageEl.style.minWidth = '';
+        stageEl.style.minHeight = '';
+    }
+
     if (paperEl) {
-        paperEl.style.transform = `scale(${roundedZoom})`;
+        // Clear ABCJS responsive padding-bottom hack so height scales purely from SVG viewBox & paper width
+        paperEl.style.paddingBottom = '';
+        paperEl.style.overflow = '';
+        paperEl.style.transform = '';
 
-        // Expand stage dimensions so scroll container detects overflow and provides horizontal & vertical scrolling
-        if (stageEl) {
-            const baseW = paperEl.offsetWidth || 820;
-            const baseH = paperEl.offsetHeight || 600;
-            const scaledW = baseW * roundedZoom;
-            const scaledH = baseH * roundedZoom;
+        const baseW = getStageBaseWidth(wrapperEl);
+        const scaledW = Math.round(baseW * roundedZoom * 10) / 10;
+        paperEl.style.width = `${scaledW}px`;
+        paperEl.style.padding = `${Math.round(24 * roundedZoom)}px ${Math.round(30 * roundedZoom)}px`;
 
-            stageEl.style.minWidth = `${scaledW + 60}px`;
-            stageEl.style.minHeight = `${scaledH + 60}px`;
+        if (options.preserveScroll !== false && wrapperEl && anchorState) {
+            if (roundedZoom <= 1.001) {
+                wrapperEl.scrollLeft = 0;
+            } else {
+                wrapperEl.scrollLeft = Math.max(0, anchorState.uX * wrapperEl.scrollWidth - anchorState.focalX);
+            }
+            if (anchorState.uY > 0) {
+                wrapperEl.scrollTop = Math.max(0, anchorState.uY * wrapperEl.scrollHeight - anchorState.focalY);
+            }
         }
     }
+
+    const displayZoom = targetZoom || zoom;
+    const pctText = `${Math.round(displayZoom * 100)}%`;
     const zoomIndicator = document.getElementById('focus-zoom-level');
-    if (zoomIndicator) {
-        zoomIndicator.textContent = `${Math.round(zoom * 100)}%`;
-    }
+    if (zoomIndicator) zoomIndicator.textContent = pctText;
     const sheetZoomIndicator = document.getElementById('zoom-level-text');
-    if (sheetZoomIndicator) {
-        sheetZoomIndicator.textContent = `${Math.round(zoom * 100)}%`;
-    }
+    if (sheetZoomIndicator) sheetZoomIndicator.textContent = pctText;
+}
+
+export function syncSheetZoom() {
+    applyZoom(currentZoom, { preserveScroll: false });
 }
 
 /**
- * Linear interpolation animation loop for buttery smooth zoom transitions.
+ * Linear interpolation animation loop for snappy, responsive zoom transitions.
  */
 function animateZoom() {
     const diff = targetZoom - currentZoom;
-    if (Math.abs(diff) < 0.001) {
+    if (Math.abs(diff) < 0.002) {
         currentZoom = targetZoom;
         applyZoom(currentZoom);
         zoomAnimationId = null;
+        anchorState = null;
         return;
     }
 
-    // Smooth lerp (0.08 factor per frame for ultra-gentle, gliding transition)
-    currentZoom += diff * 0.08;
+    // Snappy lerp (0.38 factor per frame for crisp, low-latency response)
+    currentZoom += diff * 0.38;
     applyZoom(currentZoom);
     zoomAnimationId = requestAnimationFrame(animateZoom);
 }
 
-function queueSmoothZoom(newTarget) {
-    targetZoom = Math.max(0.5, Math.min(2.0, +newTarget.toFixed(3)));
+function queueSmoothZoom(newTarget, focalPoint = null) {
+    const clampedTarget = Math.max(0.5, Math.min(2.0, +newTarget.toFixed(3)));
+    if (!zoomAnimationId || !anchorState) {
+        captureScrollAnchor(focalPoint);
+    } else if (focalPoint && anchorState.clientX !== null) {
+        const moved = Math.hypot(focalPoint.clientX - anchorState.clientX, focalPoint.clientY - anchorState.clientY);
+        if (moved > 12) captureScrollAnchor(focalPoint);
+    }
+
+    targetZoom = clampedTarget;
     setZoomLevel(targetZoom);
 
     if (!zoomAnimationId) {
@@ -68,7 +135,8 @@ function queueSmoothZoom(newTarget) {
 }
 
 export function updateZoom(delta) {
-    queueSmoothZoom(targetZoom + delta);
+    const nextStep = Math.round((targetZoom + delta) * 100) / 100;
+    queueSmoothZoom(nextStep);
 }
 
 export function resetZoom() {
@@ -131,8 +199,11 @@ export function centerSheetMusic() {
     const paper = document.getElementById('paper');
     if (!wrapper || !paper) return;
 
+    applyZoom(currentZoom, { preserveScroll: false });
+
     // Small delay/RAF to ensure ABCJS has completed rendering SVG dimensions
     requestAnimationFrame(() => {
+        applyZoom(currentZoom, { preserveScroll: false });
         const scrollRange = wrapper.scrollWidth - wrapper.clientWidth;
         if (scrollRange > 0) {
             wrapper.scrollLeft = scrollRange / 2;
@@ -143,11 +214,37 @@ export function centerSheetMusic() {
 }
 
 export function initFocusAndZoomControls() {
-    // Zoom in / out buttons (gentle 5% steps for smooth gliding)
+    // Zoom in / out buttons (clean 5% steps) & click percentage label to reset to 100%
     document.getElementById('btn-zoom-in')?.addEventListener('click', () => updateZoom(0.05));
     document.getElementById('btn-zoom-out')?.addEventListener('click', () => updateZoom(-0.05));
     document.getElementById('btn-focus-zoom-in')?.addEventListener('click', () => updateZoom(0.05));
     document.getElementById('btn-focus-zoom-out')?.addEventListener('click', () => updateZoom(-0.05));
+    document.getElementById('zoom-level-text')?.addEventListener('click', () => resetZoom());
+    document.getElementById('focus-zoom-level')?.addEventListener('click', () => resetZoom());
+
+    // Keep sheet music width & floating zoom pill synced when stage resizes (window resize, sidebar/editor toggle, focus mode)
+    const wrapperEl = document.getElementById('sheet-wrapper');
+    const workspaceEl = document.getElementById('workspace-body');
+    const zoomOverlayEl = document.querySelector('.sheet-zoom-overlay');
+    const syncZoomOverlayPosition = () => {
+        if (!wrapperEl || !workspaceEl || !zoomOverlayEl) return;
+        const rightInset = Math.max(0, workspaceEl.clientWidth - (wrapperEl.offsetLeft + wrapperEl.offsetWidth));
+        zoomOverlayEl.style.right = `${rightInset + 24}px`;
+    };
+    syncZoomOverlayPosition();
+
+    if (wrapperEl && typeof ResizeObserver !== 'undefined') {
+        let lastWrapperWidth = wrapperEl.clientWidth;
+        const ro = new ResizeObserver(() => {
+            syncZoomOverlayPosition();
+            const w = wrapperEl.clientWidth;
+            if (w > 0 && Math.abs(w - lastWrapperWidth) > 1) {
+                lastWrapperWidth = w;
+                applyZoom(currentZoom, { preserveScroll: false });
+            }
+        });
+        ro.observe(wrapperEl);
+    }
 
     // Focus toggles & toolbar buttons
     document.getElementById('btn-toggle-focus')?.addEventListener('click', () => {
@@ -173,12 +270,19 @@ export function initFocusAndZoomControls() {
     });
 
     // Ctrl + MouseWheel / Trackpad pinch zoom (smooth controlled scaling)
-    document.getElementById('sheet-wrapper')?.addEventListener('wheel', (e) => {
-        if (e.ctrlKey) {
+    wrapperEl?.addEventListener('wheel', (e) => {
+        if (e.ctrlKey || e.metaKey) {
             e.preventDefault();
-            // Scale proportional to scroll intensity with smooth decay and clamp
-            const delta = Math.max(-0.03, Math.min(0.03, -e.deltaY * 0.0004));
-            queueSmoothZoom(targetZoom + delta);
+            let dy = e.deltaY;
+            if (e.deltaMode === 1) dy *= 16;
+            else if (e.deltaMode === 2) dy *= 100;
+
+            const isDiscreteWheel = Math.abs(dy) >= 48 && e.deltaMode === 0 && Number.isInteger(e.deltaY);
+            const rawDelta = isDiscreteWheel
+                ? Math.sign(-dy) * 0.05
+                : -dy * 0.0055;
+            const delta = Math.max(-0.08, Math.min(0.08, rawDelta));
+            queueSmoothZoom(targetZoom + delta, { clientX: e.clientX, clientY: e.clientY });
         }
     }, { passive: false });
 
