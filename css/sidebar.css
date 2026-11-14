@@ -259,3 +259,344 @@
     padding: 0 5px;
     line-height: 16px;
 }
+
+/* --- File & Tune 3-Dots Options Buttons & Context Menus (Main.dc.html) --- */
+.score-header,
+.tune-list li.tune-item-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.tune-list li.tune-item-row {
+    padding: 4px 4px 4px 12px;
+}
+
+.score-header {
+    padding: 5px 6px 5px 12px;
+}
+
+.sidebar-more-btn {
+    width: 32px;
+    height: 32px;
+    border: 0;
+    background: transparent;
+    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: #2B2620;
+    opacity: 0;
+    flex-shrink: 0;
+    transition: opacity 0.12s ease, background 0.12s ease;
+}
+
+.score-header:hover .sidebar-more-btn,
+.score-header.menu-open .sidebar-more-btn,
+.tune-list li.tune-item-row:hover .sidebar-more-btn,
+.tune-list li.tune-item-row.menu-open .sidebar-more-btn {
+    opacity: 1;
+}
+
+.score-header .sidebar-more-btn:hover,
+.score-header.menu-open .sidebar-more-btn {
+    background: #F1ECDF;
+}
+
+.tune-list li.tune-item-row .sidebar-more-btn:hover,
+.tune-list li.tune-item-row.menu-open .sidebar-more-btn {
+    background: #E6DFCD;
+}
+
+.sidebar-new-tune-row {
+    font-family: var(--font-sans, Inter, sans-serif) !important;
+    font-size: 14.5px !important;
+    font-weight: 500 !important;
+    color: #6B6458 !important;
+    padding: 7px 12px !important;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.sidebar-new-tune-row:hover {
+    background: var(--bg-hover);
+    color: #2B2620 !important;
+}
+
+.sidebar-context-menu {
+    position: fixed;
+    width: 230px;
+    background: #ffffff;
+    border: 1px solid #DDD5C2;
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(43, 38, 32, 0.12);
+    padding: 6px;
+    font-family: var(--font-sans, Inter, sans-serif);
+    font-size: 14px;
+    z-index: 1200;
+    box-sizing: border-box;
+}
+
+.sidebar-context-menu button {
+    display: block;
+    width: 100%;
+    text-align: left;
+    border: 0;
+    background: none;
+    padding: 10px 12px;
+    font: inherit;
+    color: #2B2620;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.sidebar-context-menu button:hover {
+    background: #F5F1E6;
+}
+
+.sidebar-context-menu button.danger {
+    color: #B3261E;
+}
+
+.sidebar-context-menu button.danger:hover {
+    background: #FDF2F1;
+}
+
+.sidebar-context-menu .menu-divider {
+    height: 1px;
+    background: #E6DFCD;
+    margin: 4px 0;
+}
+
+/* --- Dialog Modals (Dialogs.dc.html) --- */
+.studio-modal-dialog {
+    position: fixed;
+    inset: 0;
+    margin: auto;
+    border: 0;
+    border-radius: 16px;
+    padding: 28px;
+    width: 420px;
+    max-width: calc(100vw - 32px);
+    background: #ffffff;
+    color: #2B2620;
+    box-shadow: 0 8px 24px rgba(43, 38, 32, 0.16);
+    font-family: var(--font-sans, Inter, sans-serif);
+    box-sizing: border-box;
+}
+
+.studio-modal-dialog::backdrop {
+    background: rgba(43, 38, 32, 0.32);
+}
+
+.studio-modal-dialog .dialog-form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin: 0;
+}
+
+.studio-modal-dialog h2 {
+    margin: 0;
+    font-family: 'Cormorant Garamond', var(--font-fancy, serif);
+    font-size: 28px;
+    font-weight: 600;
+    color: #2B2620;
+}
+
+.studio-modal-dialog p {
+    margin: 0;
+    font-size: 14px;
+    color: #6B6458;
+    line-height: 1.5;
+}
+
+.studio-modal-dialog label {
+    font-size: 13px;
+    font-weight: 500;
+    color: #2B2620;
+    margin-bottom: -8px;
+}
+
+.studio-modal-dialog input {
+    height: 44px;
+    box-sizing: border-box;
+    border: 1.5px solid #DDD5C2;
+    border-radius: 10px;
+    padding: 0 14px;
+    font: inherit;
+    font-size: 15px;
+    background: #ffffff;
+    color: #2B2620;
+    outline: none;
+}
+
+.studio-modal-dialog input:focus {
+    border-color: #1E3A6E;
+}
+
+.studio-modal-dialog .dialog-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    margin-top: 8px;
+}
+
+.studio-modal-dialog .btn-cancel {
+    height: 44px;
+    padding: 0 20px;
+    border-radius: 10px;
+    border: 1px solid #DDD5C2;
+    background: #ffffff;
+    color: #2B2620;
+    font: inherit;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.studio-modal-dialog .btn-primary {
+    height: 44px;
+    padding: 0 20px;
+    border-radius: 10px;
+    border: 0;
+    background: #1E3A6E;
+    color: #ffffff;
+    font: inherit;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.studio-modal-dialog .btn-danger {
+    height: 44px;
+    padding: 0 20px;
+    border-radius: 10px;
+    border: 0;
+    background: #B3261E;
+    color: #ffffff;
+    font: inherit;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: opacity 0.15s ease, background 0.15s ease, color 0.15s ease;
+}
+
+.studio-modal-dialog .btn-danger:disabled {
+    background: #E9C9C6;
+    color: #6E1B15;
+    cursor: not-allowed;
+}
+
+/* --- Library Header Buttons (+ New & Backup •••) --- */
+.btn-new-file {
+    height: 32px;
+    padding: 0 10px;
+    border: 1.5px solid #1E3A6E;
+    background: #ffffff;
+    color: #1E3A6E;
+    border-radius: 9px;
+    font-family: var(--font-sans, Inter, sans-serif);
+    font-size: 12.5px;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    white-space: nowrap;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.btn-new-file:hover {
+    background: #F0F4FA;
+}
+
+.btn-backup-menu {
+    width: 32px;
+    height: 32px;
+    border: 0;
+    background: transparent;
+    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: #2B2620;
+    transition: background 0.12s ease;
+}
+
+.btn-backup-menu:hover,
+.btn-backup-menu.active {
+    background: #E6DFCD;
+}
+
+/* --- Import Dropzone --- */
+.import-dropzone {
+    border: 1.5px dashed #B8AE97;
+    border-radius: 12px;
+    padding: 24px 16px;
+    text-align: center;
+    font-size: 14px;
+    color: #4A4439;
+    line-height: 1.5;
+    cursor: pointer;
+    transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.import-dropzone:hover,
+.import-dropzone.dragover {
+    border-color: #1E3A6E;
+    background: #F6F8FC;
+}
+
+.import-dropzone-meta {
+    display: block;
+    margin-top: 4px;
+    font-size: 12px;
+    color: #6B6458;
+}
+
+/* --- Export Scores Modal List --- */
+.studio-modal-dialog input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    margin: 0;
+    accent-color: #1E3A6E;
+    cursor: pointer;
+}
+
+.export-scores-box {
+    border: 1px solid #DDD5C2;
+    border-radius: 12px;
+    padding: 6px;
+    max-height: 220px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.export-scores-box label {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    padding: 6px 8px;
+    border-radius: 6px;
+    font-size: 16px;
+    font-weight: 500;
+    margin-bottom: 3px;
+    cursor: pointer;
+    transition: background 0.12s ease;
+}
+
+.export-scores-box label:hover {
+    background: #F5F1E6;
+}
+
+.export-tune-count {
+    margin-left: auto;
+    font-size: 12.5px;
+    font-weight: 400;
+    color: #6B6458;
+}

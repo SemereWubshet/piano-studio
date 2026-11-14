@@ -36,6 +36,9 @@ function getGuestScores() {
 
 function setGuestScores(scoresObj) {
     localStorage.setItem(GUEST_STORAGE_KEY, JSON.stringify(scoresObj));
+    if (navigator.storage && typeof navigator.storage.persist === 'function') {
+        navigator.storage.persist().catch(() => {});
+    }
 }
 
 export async function unlockOwner(passphrase) {
@@ -58,38 +61,56 @@ export async function lockOwner() {
     onlineCache.files.clear();
 }
 
-export function exportGuestScores() {
-    const scores = getGuestScores();
-    const blob = new Blob([JSON.stringify(scores, null, 2)], { type: 'application/json' });
+export function getExportableScoreNames() {
+    return [...(state.scoreFiles || [])].sort((a, b) => a.localeCompare(b));
+}
+
+export async function exportScoresAsZip(selectedNames) {
+    if (typeof window.JSZip === 'undefined') {
+        throw new Error('JSZip failed to load. Please refresh and try again.');
+    }
+    const zip = new window.JSZip();
+
+    let count = 0;
+    for (const name of selectedNames) {
+        let content = state.fileContents?.[name];
+        if (content === undefined) {
+            content = await fetchScoreContent(name);
+        }
+        if (content !== undefined) {
+            zip.file(name, content);
+            count++;
+        }
+    }
+    if (count === 0) {
+        throw new Error('No scores selected to export.');
+    }
+
+    const blob = await zip.generateAsync({ type: 'blob' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `piano-studio-local-scores-${new Date().toISOString().slice(0, 10)}.json`;
+    a.download = `piano-studio-scores-${new Date().toISOString().slice(0, 10)}.zip`;
     a.click();
     URL.revokeObjectURL(url);
 }
 
-export async function importGuestScores(file) {
-    const text = await file.text();
-    const current = getGuestScores();
+export async function importGuestScores(filesOrFile) {
+    const fileList = Array.from(filesOrFile instanceof FileList ? filesOrFile : (Array.isArray(filesOrFile) ? filesOrFile : [filesOrFile]));
+    const imported = {};
 
-    if (file.name.endsWith('.json')) {
-        const parsed = JSON.parse(text);
-        if (parsed && typeof parsed === 'object') {
-            for (const [name, content] of Object.entries(parsed)) {
-                if (name.endsWith('.abc') && typeof content === 'string') {
-                    current[name] = content;
-                }
-            }
+    for (const file of fileList) {
+        if (!file.name.endsWith('.abc')) {
+            throw new Error(`Unsupported file "${file.name}". Please import .abc score files only.`);
         }
-    } else if (file.name.endsWith('.abc')) {
-        current[file.name] = text;
-    } else {
-        throw new Error('Unsupported file type. Please import a .abc or .json file.');
+        imported[file.name] = await file.text();
     }
 
-    setGuestScores(current);
-    return Object.keys(current);
+    const names = Object.keys(imported);
+    for (const name of names) {
+        await saveScoreContent(name, imported[name]);
+    }
+    return names;
 }
 
 export async function fetchScoreList() {
@@ -166,6 +187,56 @@ export async function saveScoreContent(fileName, fullFileCode) {
     guest[fileName] = fullFileCode;
     setGuestScores(guest);
     return { ok: true };
+}
+
+export async function deleteScoreFile(fileName) {
+    if (fileName === 'sample.abc') {
+        throw new Error('sample.abc cannot be deleted.');
+    }
+
+    if (isLocalMode()) {
+        const res = await fetch(`/delete/${encodeURIComponent(fileName)}`, { method: 'POST' });
+        if (!res.ok) {
+            throw new Error(`Failed to delete: ${res.statusText}`);
+        }
+        return res;
+    }
+
+    onlineCache.files.delete(fileName);
+
+    if (onlineCache.authenticated) {
+        const res = await fetch('/api/save?action=delete', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ filename: fileName })
+        });
+        if (!res.ok) {
+            throw new Error(`Failed to delete online: ${res.statusText}`);
+        }
+        return res;
+    }
+
+    const guest = getGuestScores();
+    delete guest[fileName];
+    setGuestScores(guest);
+    return { ok: true };
+}
+
+export async function renameScoreFile(oldFileName, newFileName) {
+    if (oldFileName === newFileName) return;
+    const content = await fetchScoreContent(oldFileName);
+    await saveScoreContent(newFileName, content);
+    await deleteScoreFile(oldFileName);
+}
+
+export function exportSingleScoreFile(fileName, content) {
+    const blob = new Blob([content || ''], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = fileName.endsWith('.abc') ? fileName : `${fileName}.abc`;
+    a.click();
+    URL.revokeObjectURL(url);
 }
 
 export async function checkHeartbeat() {

@@ -26,7 +26,7 @@ const STORAGE_LAST_TUNE_KEY = 'piano_studio_last_tune_index';
 class PianoStudioApp {
     async init() {
         this.setupSystemLifecycle();
-        initSidebarControls();
+        initSidebarControls(() => this.loadAllScores());
         initEditorControls(() => this.onScoreModified());
         initFocusAndZoomControls();
         initCountdownUI();

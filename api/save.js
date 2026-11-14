@@ -60,6 +60,24 @@ export default async function handler(req, res) {
     return res.status(200).json({ ok: true, count: Object.keys(sanitized).length });
   }
 
+  if (action === 'delete') {
+    const { filename } = body;
+    if (!isValidFilename(filename) || filename === 'sample.abc') {
+      return res.status(400).json({ error: 'Invalid filename' });
+    }
+    const [scores, pending] = await Promise.all([
+      getJson('piano:scores', {}),
+      getJson('piano:pending', {})
+    ]);
+    delete scores[filename];
+    delete pending[filename];
+    await Promise.all([
+      setJson('piano:scores', scores),
+      setJson('piano:pending', pending)
+    ]);
+    return res.status(200).json({ ok: true, deleted: filename });
+  }
+
   // Default: save a single phone/online edit to pending
   const { filename, content } = body;
   if (!isValidFilename(filename) || typeof content !== 'string') {

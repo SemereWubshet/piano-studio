@@ -21,8 +21,19 @@ export function renderMusicScore(paperElementId = 'paper') {
     clearLitKeys();
 
     if (state.synthControl) {
-        state.synthControl.pause();
+        try {
+            state.synthControl.pause();
+            if (typeof state.synthControl.disable === 'function') {
+                state.synthControl.disable(true);
+            }
+        } catch (e) {
+            // Ignore cleanup errors
+        }
+        state.synthControl = null;
     }
+
+    const paperEl = document.getElementById(paperElementId);
+    if (paperEl) paperEl.innerHTML = '';
 
     const allTunes = parseTunes(state.fileContents[state.activeFileName] || "");
     const currentTuneAbc = allTunes[state.activeTuneIndex] || "";

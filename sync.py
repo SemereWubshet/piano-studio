@@ -2,7 +2,7 @@
 """
 Piano Studio - Local-First Cloud Sync
 
-1. Fetches any pending edits made on your phone/online.
+1. Fetches any pending edits made online.
 2. Shows a diff against your local scores/ and lets you [a]ccept, [k]eep local, or [s]kip.
 3. Pushes your local scores/*.abc (excluding sample.abc) to your private cloud store.
 
@@ -54,10 +54,10 @@ def review_pending_edits(base_url, passphrase):
     res = api_request(base_url, "/api/save?action=pending", passphrase, method="GET")
     pending = res.get("pending", {})
     if not pending:
-        print("No pending phone edits.")
+        print("No pending online edits.")
         return
 
-    print(f"\nFound {len(pending)} pending edit(s) from online/phone:\n")
+    print(f"\nFound {len(pending)} pending online edit(s):\n")
     resolved = []
 
     for filename, info in pending.items():
@@ -77,7 +77,7 @@ def review_pending_edits(base_url, passphrase):
                 local_content.splitlines(keepends=True),
                 remote_content.splitlines(keepends=True),
                 fromfile=f"local/{filename}",
-                tofile=f"phone/{filename}",
+                tofile=f"online/{filename}",
             )
             print("".join(diff))
         else:
@@ -85,15 +85,15 @@ def review_pending_edits(base_url, passphrase):
             print(remote_content[:400] + ("..." if len(remote_content) > 400 else ""))
 
         while True:
-            choice = input("  [a]ccept phone edit, [k]eep local, [s]kip? ").strip().lower()
+            choice = input("  [a]ccept online edit, [k]eep local, [s]kip? ").strip().lower()
             if choice in ("a", "accept"):
                 with open(local_path, "w", encoding="utf-8") as f:
                     f.write(remote_content)
-                print(f"  -> Saved phone edit to {local_path}")
+                print(f"  -> Saved online edit to {local_path}")
                 resolved.append(filename)
                 break
             elif choice in ("k", "keep"):
-                print("  -> Kept local version (phone edit discarded)")
+                print("  -> Kept local version (online edit discarded)")
                 resolved.append(filename)
                 break
             elif choice in ("s", "skip"):

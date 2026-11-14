@@ -110,6 +110,26 @@ class PianoHandler(http.server.SimpleHTTPRequestHandler):
                 self.send_response(500)
                 self.end_headers()
                 self.wfile.write(str(e).encode())
+            return
+
+        if self.path.startswith('/delete/'):
+            filename = urllib.parse.unquote(self.path[8:])
+            if not filename.endswith('.abc') or '/' in filename or '\\' in filename or '..' in filename or filename == 'sample.abc':
+                self.send_response(400)
+                self.end_headers()
+                self.wfile.write(b'Invalid filename')
+                return
+            filepath = os.path.join('scores', filename)
+            try:
+                if os.path.exists(filepath):
+                    os.remove(filepath)
+                self.send_response(200)
+                self.end_headers()
+                self.wfile.write(b'Deleted successfully')
+            except Exception as e:
+                self.send_response(500)
+                self.end_headers()
+                self.wfile.write(str(e).encode())
 
     def log_message(self, format, *args):
         # Silence the heartbeat so the terminal stays clean

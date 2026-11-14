@@ -81,6 +81,9 @@ function buildBpmPill(inline, visualObj) {
     }
 }
 
+let activeScrubber = null;
+let scrubberWindowListenersBound = false;
+
 /**
  * Enables smooth and precise click & drag scrubbing on the progress bar.
  */
@@ -123,6 +126,15 @@ export function initProgressBarScrubber(container) {
         }
     };
 
+    activeScrubber = {
+        get isDragging() { return isDragging; },
+        seekToPosition,
+        endSeeking: () => {
+            isDragging = false;
+            endSeeking();
+        }
+    };
+
     // Use capture phase and stopPropagation so ABCJS's internal listener doesn't conflict
     track.addEventListener('mousedown', (e) => {
         if (e.button !== 0) return;
@@ -137,15 +149,6 @@ export function initProgressBarScrubber(container) {
         e.stopPropagation();
     }, true);
 
-    window.addEventListener('mousemove', (e) => {
-        if (!isDragging) return;
-        seekToPosition(e.clientX);
-    });
-
-    window.addEventListener('mouseup', () => {
-        if (isDragging) endSeeking();
-    });
-
     track.addEventListener('touchstart', (e) => {
         if (e.touches.length > 0) {
             e.stopPropagation();
@@ -154,14 +157,23 @@ export function initProgressBarScrubber(container) {
         }
     }, { passive: false, capture: true });
 
-    window.addEventListener('touchmove', (e) => {
-        if (!isDragging || e.touches.length === 0) return;
-        seekToPosition(e.touches[0].clientX);
-    }, { passive: true });
-
-    window.addEventListener('touchend', () => {
-        if (isDragging) endSeeking();
-    });
+    if (!scrubberWindowListenersBound) {
+        scrubberWindowListenersBound = true;
+        window.addEventListener('mousemove', (e) => {
+            if (activeScrubber?.isDragging) activeScrubber.seekToPosition(e.clientX);
+        });
+        window.addEventListener('mouseup', () => {
+            if (activeScrubber?.isDragging) activeScrubber.endSeeking();
+        });
+        window.addEventListener('touchmove', (e) => {
+            if (activeScrubber?.isDragging && e.touches.length > 0) {
+                activeScrubber.seekToPosition(e.touches[0].clientX);
+            }
+        }, { passive: true });
+        window.addEventListener('touchend', () => {
+            if (activeScrubber?.isDragging) activeScrubber.endSeeking();
+        });
+    }
 }
 
 /**
